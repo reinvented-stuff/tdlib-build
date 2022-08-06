@@ -1,0 +1,140 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:truthy
+
+name: Build TDLib
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+
+  notify_started:
+    name: Send notification on start
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Send notification on start
+        uses: rest-gateway/notification-action@master
+        with:
+          message: |
+            Repository: ${{ github.repository }}
+            Triggered on push to '${GITHUB_REF#refs/heads/}'
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+  validate_new_version:
+    name: Validate new version
+    runs-on: ubuntu-latest
+    outputs:
+      planned_version: ${{ steps.validate_new_version.outputs.planned_version }}
+      version_file_exists: ${{ steps.validate_new_version.outputs.version_file_exists }}
+      tag_hash: ${{ steps.validate_new_version.outputs.tag_hash }}
+      can_create: ${{ steps.validate_new_version.outputs.can_create }}
+      tag_exists: ${{ steps.validate_new_version.outputs.tag_exists }}
+      branch_name: ${{ steps.validate_new_version.outputs.branch_name }}
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: Use latest released action
+        id: validate_new_version
+        uses: reinvented-stuff/validate-version-action@master
+        with:
+          version_filename: ".version"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          fail_on_error: false
+
+
+  build_linux:
+    name: Build on Linux
+    outputs:
+      job_status: ${{ job.status }}
+      artifact_name: ${{ steps.set_artifact_name.outputs.name }}
+    strategy:
+      matrix:
+        version:
+          - ref: ${{ needs.validate_new_version.outputs.planned_version }}
+          - ref: master
+    runs-on: ubuntu-22.04
+
+    needs:
+      - validate_new_version
+
+    env:
+      PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
+      CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
+      TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
+      BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
+      APP_NAME: "plugin-echo-conveyor"
+      REF: "${{ matrix.version.ref }}"
+      TARGETARCH: "amd64"
+
+    steps:
+
+      - name: Install dependencies
+        id: install_dependencies
+        shell: bash
+        run: |
+          sudo apt-get install make git zlib1g-dev libssl-dev gperf php-cli cmake g++
+
+
+      - name: Check out tdlib repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: https://github.com/tdlib/td.git
+          ref: "${{ env.REF }}"
+
+
+      - name: Print out directory contents
+        id: print_directory_contents
+        shell: bash
+        run: |
+          ls -lAth .
+
+
+      - name: Build TDLib
+        id: build
+        shell: bash
+        run: |
+          cd td
+          rm -rf build
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=../tdlib ..
+          cmake --build . --target prepare_cross_compiling
+          cd ..
+          php SplitSource.php
+          cd build
+          cmake --build . --target install
+          cd ..
+          php SplitSource.php --undo
+          cd ..
+          ls -l td/tdlib
+
+      - name: Notify that docker image has been built and pushed
+        uses: rest-gateway/notification-action@master
+        with:
+          message: >-
+            Docker image successfully built and pushed:
+
+            ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+...
