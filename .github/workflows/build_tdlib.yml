@@ -42,7 +42,7 @@ jobs:
 
     steps:
 
-      - name: Check out code
+      - name: Check out this repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -89,6 +89,12 @@ jobs:
       ARTIFACT_NAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}.tar.gz"
 
     steps:
+
+      - name: Check out this repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
 
       - name: Install dependencies
         id: install_dependencies
