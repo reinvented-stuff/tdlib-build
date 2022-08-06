@@ -126,16 +126,21 @@ jobs:
           cd ..
           ls -l td/tdlib
 
-      - name: Notify that docker image has been built and pushed
-        uses: rest-gateway/notification-action@master
-        with:
-          message: >-
-            Docker image successfully built and pushed:
 
-            ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}
-          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
-          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
-          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
-          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+      - name: Compress binaries
+        id: compress_binaries
+        shell: bash
+        run: |
+          tar -zvcf "tdlib-${{ env.REF }}-linux.tar.gz" td/tdlib
+
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: "tdlib-${{ env.REF }}-linux.tar.gz"
+          path: "tdlib-${{ env.REF }}-linux.tar.gz"
+          if-no-files-found: error
+          retention-days: 90
+
 
 ...
