@@ -97,6 +97,7 @@ jobs:
           fetch-depth: 0
           repository: tdlib/td
           ref: "${{ env.REF }}"
+          path: td
 
 
       - name: Print out directory contents
