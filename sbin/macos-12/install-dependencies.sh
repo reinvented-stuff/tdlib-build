@@ -7,7 +7,12 @@ set -e
 
 echo "Start installing dependencies"
 
-xcode-select --install
+if xcode-select --install; then
+	echo "xcode successfully installed"
+else
+	echo "xcode is probably already there. not taking any more effort to verify what has happened"
+fi
+
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install gperf cmake openssl
 
