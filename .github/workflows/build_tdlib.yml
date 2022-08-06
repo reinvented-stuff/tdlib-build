@@ -57,8 +57,8 @@ jobs:
           fail_on_error: false
 
 
-  build_linux:
-    name: Build on Linux
+  build_matrix:
+    name: Build Multi-platform
     outputs:
       job_status: ${{ job.status }}
       artifact_name: ${{ steps.set_artifact_name.outputs.name }}
@@ -67,7 +67,12 @@ jobs:
         version:
           - ref: ${{ needs.validate_new_version.outputs.planned_version }}
           - ref: master
-    runs-on: ubuntu-22.04
+        runs-on:
+          - os: ubuntu-22.04
+            label: linux
+          - os: macos-12
+            label: macos
+    runs-on: ${{ matrix.runs-on.os }}
 
     needs:
       - validate_new_version
@@ -81,6 +86,7 @@ jobs:
       APP_NAME: "plugin-echo-conveyor"
       REF: "${{ matrix.version.ref }}"
       TARGETARCH: "amd64"
+      ARTIFACT_NAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}.tar.gz"
 
     steps:
 
@@ -88,7 +94,7 @@ jobs:
         id: install_dependencies
         shell: bash
         run: |
-          sudo apt-get install make git zlib1g-dev libssl-dev gperf php-cli cmake g++
+          bash "sbin/${{ matrix.runs-on.os }}/install-dependencies.sh"
 
 
       - name: Check out tdlib repo
@@ -111,34 +117,21 @@ jobs:
         id: build
         shell: bash
         run: |
-          cd td
-          rm -rf build
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=../tdlib ..
-          cmake --build . --target prepare_cross_compiling
-          cd ..
-          php SplitSource.php
-          cd build
-          cmake --build . --target install
-          cd ..
-          php SplitSource.php --undo
-          cd ..
-          ls -l td/tdlib
+          bash "sbin/${{ matrix.runs-on.os }}/build.sh"
 
 
       - name: Compress binaries
         id: compress_binaries
         shell: bash
         run: |
-          tar -zvcf "tdlib-${{ env.REF }}-linux.tar.gz" td/tdlib
+          tar -zvcf "${{ env.ARTIFACT_NAME }}" td/tdlib
 
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
-          name: "tdlib-${{ env.REF }}-linux.tar.gz"
-          path: "tdlib-${{ env.REF }}-linux.tar.gz"
+          name: "${{ env.ARTIFACT_NAME }}"
+          path: "${{ env.ARTIFACT_NAME }}"
           if-no-files-found: error
           retention-days: 90
 
