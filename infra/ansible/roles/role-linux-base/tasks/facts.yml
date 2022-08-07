@@ -4,8 +4,6 @@
   set_fact:
     linux_os_family: "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version }}"
     linux_os_distribution: "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-  tags:
-    - always
 
 - name: Load OS-specific variables
   include_vars: "{{ lookup('first_found', possible_files) }}"

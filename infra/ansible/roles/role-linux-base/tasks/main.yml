@@ -1,6 +1,8 @@
 ---
 
 - include: facts.yml
+  tags:
+    - facts
 - include: packages.yml
 - include: setup.yml
 - include: swap.yml
