@@ -1,7 +1,0 @@
-items.find({
-  "type" : "file",
-  "repo" : {"$match" : "tdlib"}
-  })
-  .include("name", "repo", "path", "size", "created", "created_by")
-  .sort({"$desc": ["size"]})
-  .limit(100)

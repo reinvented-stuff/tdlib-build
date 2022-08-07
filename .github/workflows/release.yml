@@ -195,14 +195,14 @@ jobs:
       - name: Notify about release
         uses: rest-gateway/notification-action@master
         with:
-          message: |
+          message: >-
             <b>Release ${{env.APP_NAME}} ${{env.PLANNED_VERSION}}:</b>
 
             <b>Artifactory:</b>
-            ${{ secrets.ARTIFACTORY_REPO_URL }}
+            <code>${{ secrets.ARTIFACTORY_REPO_URL }}</code>
 
             <b>Release:</b>
-            https://github.com/${{ github.repository }}/releases/tag/${{env.PLANNED_VERSION}}
+            <code>https://github.com/${{ github.repository }}/releases/tag/${{env.PLANNED_VERSION}}</code>
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
