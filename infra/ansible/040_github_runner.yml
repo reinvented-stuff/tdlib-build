@@ -31,6 +31,13 @@
         owner: ghr
         group: wheel
 
+    - name: Install actions-runner dependencies
+      become: yes
+      shell:
+        chdir: /opt/actions-runner
+        cmd: >-
+          ./bin/installdependencies.sh
+
     - name: Configure actions-runner
       become: yes
       become_user: ghr
