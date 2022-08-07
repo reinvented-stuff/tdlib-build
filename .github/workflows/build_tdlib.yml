@@ -7,7 +7,7 @@ name: Build TDLib
 on:
   push:
     branches:
-      - '*'
+      - 'build_*'
       - '!master'
 
 jobs:
