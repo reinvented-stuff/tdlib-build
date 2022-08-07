@@ -1,0 +1,29 @@
+---
+swap_file_enabled: yes
+swap_file_path: /swap
+swap_file_size_mb: 2048
+
+nameservers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+permit_root_login: false
+
+users:
+  - name: "pavelkim"
+    shell: "/bin/bash"
+    groups: "wheel"
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/IsmDgWqNct6LCv3oj3G7dewoUzPcVzeastNLfl++qc24ABV2CHJpWDuDkcgq7ASC4jJKiETXSRsA48gFYaj0cIUrIiMxW+m5G0qvKsG/w9LQ8LXJXzSkVvgYRHF/HZWiUuq1j3JEtX4KlpOda8eDMdeRcNuxFGywsuQefLeCwfcGxKA6tfOwYn9GEASjPQyOXNfEDoheB0QcvmaQPeGX8kD6K+Ndqe7E/OKcYSFjUfysrPkk0EE4BaYVLN1fvGIPcaIcJzT7jc37YTVx9h/vkDIANErVpap+mHz2Ec079HgcMrRk3qjGrdTAv2qN1gC2G/dIe0anXjNWMjKq04Sj pavelkim@laptop"
+    extra_ssh_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKC6ix0HWXd3yH+Y9ZFK2wcSO7jz6SUykKLSJww7Zt/dUtWvScpLyj0gRoiVOeXebVwP/PKtIuR55STYKvvTjtq18VsjxQz0pQHPwgXArEBK7yjOfUkxKE0nZrfkO6PLcbnlU9m+XvcN9aOM4GMX/+GiSXSFO+o1cUYpz6nY51TFfMopuBqWAk+VdE67azMsk9o60xbvEhI2C0m41myaEbH0v5iNN2jZocNNTmtI0plVcWTGi4mNKoE/Z0lFm87WBP/pgkuK5Vls2Oy93IDuLxqzbd773jxwRGA3i9plcBTa22SERpSdwzu4nC1FB+YfbEkhDOGdIcPKIxWvwnqNNzT2TVXuAA3F0LWJVZrLyesvm5AtdYmXRwoj5Ty5PKwZH1NdzfcX+oOj6mBWtwt3poBkWMfzIegTHCIALxClxy7fr1EkxRCh3TIRXkGfilssViEW4vyan34/O88DkO0epGHQqU/dApVNbKc6X47b2jRkHe5UYRuRcT/fuH4Vyk0Ac= pavelkim@marge"
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWiL0/2nSsj1huD4LwDZMXRjg8iIiqd0N68gKwlEmJSE4CVS//eyNtxwj8siMJDEXdVWBMsf8MS27sUYG/S7ibk/PkIUIuoL95lIujBQ/TEdcdYzfFWXcXhVaxY9WcQvSH7l1j4W91jpf45qrvPNyUPPjXAIjd/U8WNMY3xFo14is/qzP9ly+Tk9RrjeZxxhgDP4wM65wbfE/xNamda/eB+ZIPq3t7WLY7Pw/yVdpTFwMLD16qMol1gpRdR1wlYJ84RWCW7vs67OsHHpqqFCNi6A8CYIkapNAl7LY3dpAriM+rwoCAsJQp0/A8qEsvaDnydI1Yz2UOaC23fB8V4JX5 pavelkim@v2"
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJkaZnAaYXFm9cjiZXJf6Bk4sr7/W4i1qZo92Fsi83YXGcbCdJf/02ZZGu6q7A1ICHy8Gdj80aI+mqJhDcjZRFVfs4pheUryY+xvlmDXM7IpbxHmPlbQEsyc2r6EubbwX7NxV24j9/+Wd3gPD+R4kKJUtpLFYEB7WCErmcTETBOYHSA6T/gz/bOdOWMYtxR7prVCkdYwtF+BOw9kTUPc56RkVGpsFEkUhPzKJF2XbwLCY7nBU1c1J6NnNGe/wxtpst/ZArGWrdkjWzx3PKZsb4Ys7uJt9rKVoCiUbvvLxrEAMseCirgTadN4CIO0FT1xQN5HE7e1E8jsBBqtCtBgU9 pavelkim@v3"
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFQ2mhUvR/8PNb8y52+EcO1OxPfrscRwEZvbkZdnQeua pavelkim@mbp"
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDH2qyfAaZMpsVSdB/VNqEm8A4WT53mRFW8ibv4x7LUdBjGY3eqDqh5yG1yYTY88CIOqgLY36IgK/WY1KGPMP8B1WaGBFgVd3SZKpI0vfxUbWfEtcEnju9LefN0pudsTUCmmVXWXx+n3EH2Onq2JDm1ZIkzo3gVOpsCUcINyWTQJJ2wnTf/TS3vXQPI4FM+5d1SmzDKIfPBJXe8fzMJgvdxDL4lrYnjsbo3v4qnMGCafFIB+tYpdKSAGYVn9DL0RVbUzw0N/FU9DaxHlx760SFtMZlL4Scfx+HLQPs5K/p7N96QWrhgx9vI3u877MeHSE16IwyLs+7AXnBhVhe39GNpsKpDelxy4Yn+YWEKME6Z6i0ZVLvPqqpNiDUWB57k9ADl+qHAy1nFEVIRibdfELz2qN7nhf5IBoldGhfd4gWiiMFDsxQDyfL8zdGbLyCipre9oWvCMtufvx9aSwI/feSGKgMjeJn8ruNV0XOel0RQFdNA024ninUg4cfSKRYJTLxFVu63aIOttC0fs5qgjYpVbwCR0EvW/oF1NiJwbZJeP1bKQ4CK0xZ0jAeolk4rkpVbjfpd+oPbO0O5SfJe6P11Dt4tTnn5SWUIgB6rSTtbO5L38xObdXYD+5YSg3lREalbnSwMYZ8zRe3KP1dBqY2NYMGkRseudCSzuLtpXmjHJw== pavelkim@mbp"
+
+  - name: "ghr"
+    shell: "/bin/bash"
+    groups: "wheel"
+    ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILKF94wuU4G+Lr2qZyawGGsFp45Oo0k/EQL6HhtNyFiM"
+
+...

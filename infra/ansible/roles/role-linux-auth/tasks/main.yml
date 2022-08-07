@@ -1,0 +1,4 @@
+---
+- name: Configure Linux Auth
+  include: auth.yml
+  tags: auth

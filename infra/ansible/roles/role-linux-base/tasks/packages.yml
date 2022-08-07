@@ -1,0 +1,33 @@
+---
+
+- name: Setup yum packages and repos
+  block: 
+
+    - name: Install yum repo packages
+      yum:
+        name: "{{ item }}"
+        state: installed
+      loop:
+        - "{{ yum_repo_packages_global }}"
+        - "{{ yum_repo_packages_group }}"
+        - "{{ yum_repo_packages_host }}"
+      tags: 
+        - packages
+
+
+    - name: Install base packages
+      yum:
+        name: "{{ item }}"
+        state: installed
+      loop:
+        - "{{ yum_packages_global }}"
+        - "{{ yum_packages_group }}"
+        - "{{ yum_packages_host }}"
+      tags: 
+        - packages
+
+  tags:
+    - yum
+    - packages
+
+...

@@ -1,0 +1,10 @@
+---
+
+- include: facts.yml
+- include: packages.yml
+- include: setup.yml
+- include: swap.yml
+- include: services.yml
+- include: sysctl.yml
+
+...

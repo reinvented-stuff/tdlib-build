@@ -1,0 +1,111 @@
+- name: Create users
+  user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell | default(omit) }}"
+    groups: "{{ item.groups | default(omit) }}"
+    password: "{{ item.password | default(omit)}}"
+    home: "{{ item.home | default(omit) }}"
+    update_password: "{{ 'always' if 'password' in item else 'on_create' }}"
+  register: changes_create_users
+  with_items: "{{ users }}"
+  tags:
+    - create_users
+
+
+- name: Declare variable with resulted users
+  set_fact:
+    current_users: "{{ changes_create_users.results }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ current_users }}"
+
+- name: Change bash prompt
+  lineinfile:
+    path: "{{ item.home | default('/home/' + item.name) }}/.bashrc"
+    line: 'PS1="[\u@\H \W]\\$ "'
+    state: present
+  with_items: "{{ current_users }}"
+  when: item != "root"
+  ignore_errors: '{{ ansible_check_mode }}'
+
+## TODO: Add update_password parameter to user definition
+
+- name: Provision main ssh keys (overriding everything else)
+  authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ item.ssh_key }}"
+    exclusive: yes
+  with_items: "{{ users }}"
+  tags:
+    - ssh_keys
+  ignore_errors: '{{ ansible_check_mode }}'
+
+- name: Provision extra ssh keys
+  authorized_key:
+    user: "{{ item.0.name }}"
+    state: present
+    key: "{{ item.1 }}"
+    exclusive: no
+  loop: "{{ users | subelements('extra_ssh_keys', {'skip_missing': True}) }}"
+  tags:
+    - ssh_keys
+  ignore_errors: '{{ ansible_check_mode }}'
+
+- name: Provision extra ssh keys for host_vars
+  authorized_key:
+    user: "{{ item.0.name }}"
+    state: present
+    key: "{{ item.1 }}"
+    exclusive: no
+  loop: "{{ host_users | subelements('extra_ssh_keys', {'skip_missing': True}) }}"
+  tags:
+    - ssh_keys
+
+- name: "Ensure deleted users are absent"
+  user:
+    name: "{{ item.name }}"
+    state: "absent"
+    force: yes
+  with_items: "{{ deleted_users }}"
+  tags: 
+    - delete_users
+  when: "deleted_users.0 is defined"
+
+- name: Ensure sshd doesn't allow password authentication
+  lineinfile:
+    name: "/etc/ssh/sshd_config"
+    regexp: 'PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    backup: yes
+  notify:
+    - Restart sshd
+  tags:
+    - sshd_config
+  when: not permit_password_auth
+
+- name: Ensure sshd doesn't allow root login
+  lineinfile:
+    name: "/etc/ssh/sshd_config"
+    regexp: '^PermitRootLogin.*'
+    line: 'PermitRootLogin no'
+    backup: yes
+  notify:
+    - Restart sshd
+  tags:
+    - sshd_config
+  when: permit_root_login | bool == false
+
+- name: Add sudoers NOPASSWD rule for wheel group
+  become: yes
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    state: present
+    mode: 0440
+    create: yes
+    validate: 'visudo -cf %s'
+  tags:
+    - sudoers

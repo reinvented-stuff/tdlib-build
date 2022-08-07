@@ -1,0 +1,17 @@
+---
+
+podman_containers:
+  - name: node_exporter
+    image: quay.io/prometheus/node-exporter:latest
+    state: present
+    network: host
+    pid: host
+    cmd_args:
+      - --path.rootfs=/host
+      - --collector.systemd
+      - --collector.processes
+    volumes:
+      - /:/host:ro,rslave
+      - /run/systemd/private:/run/systemd/private:ro
+
+...
