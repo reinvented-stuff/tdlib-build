@@ -12,6 +12,10 @@ Docs: https://core.telegram.org/tdlib
 
 # Compatibility
 
+Build matrix:
+* macos-12, amd64
+* ubuntu-22.04, amd64
+
 According to the official documentation the compiled library should be usable with the following languages:
 * Go
 * Pyhon
