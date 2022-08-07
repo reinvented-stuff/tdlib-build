@@ -7,7 +7,7 @@ name: Prepare Github Runners
 on:
   workflow_run:
     workflows:
-      - "Build*"
+      - "Build TDLib"
     types:
       - requested
 
