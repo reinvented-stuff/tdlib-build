@@ -1,0 +1,206 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:truthy
+
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  notify_started:
+    name: Send notification on start
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Send notification on start
+        uses: rest-gateway/notification-action@master
+        with:
+          message: |
+            Repository: ${GITHUB_REPOSITORY}
+            Workflow: ${GITHUB_WORKFLOW}
+            Triggered on push to '${GITHUB_REF#refs/heads/}'
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+  validate_new_version:
+    name: Validate new version
+    runs-on: ubuntu-latest
+    outputs:
+      planned_version: ${{ steps.validate_new_version.outputs.planned_version }}
+      version_file_exists: ${{ steps.validate_new_version.outputs.version_file_exists }}
+      tag_hash: ${{ steps.validate_new_version.outputs.tag_hash }}
+      can_create: ${{ steps.validate_new_version.outputs.can_create }}
+      tag_exists: ${{ steps.validate_new_version.outputs.tag_exists }}
+      branch_name: ${{ steps.validate_new_version.outputs.branch_name }}
+
+    steps:
+
+      - name: Check out this repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: Use latest released action
+        id: validate_new_version
+        uses: reinvented-stuff/validate-version-action@master
+        with:
+          version_filename: ".version"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          fail_on_error: false
+
+
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    env:
+      PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
+      CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
+      TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
+      BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
+      APP_NAME: "tdlib"
+
+    outputs:
+      job_status: ${{ job.status }}
+
+    needs:
+      - validate_new_version
+
+    if: >
+      github.event_name == 'push'
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+
+      - name: Generate changelog
+        id: generate_changelog
+        uses: reinvented-stuff/changelog-render-action@master
+        with:
+          long_changelog_export_filename: ".long_changelog.md"
+          short_changelog_export_filename: ".short_changelog.md"
+          print_out_changelogs: true
+
+
+      - name: Create a new tag
+        if: >
+          needs.validate_new_version.outputs.can_create == 'true' &&
+          needs.validate_new_version.outputs.branch_name == 'master' &&
+          github.event_name == 'push'
+        run: |
+          curl --request POST --url https://api.github.com/repos/${{ github.repository }}/git/tags \
+          -H 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          -H 'content-type: application/json' \
+          --data '{"tag": "${env.PLANNED_VERSION}",
+            "message": "Pipeline build tag",
+            "object": "${{ github.sha }}",
+            "type": "commit",
+            "tagger": {
+              "name": "Alice from Wonderland",
+              "email": "noreply@localhost.localdomain",
+              "date": "${{steps.timestamp.outputs.timestamp}}"
+            }'
+
+
+      - name: Create a Release
+        id: create_release
+        if: >
+          needs.validate_new_version.outputs.can_create == 'true' &&
+          needs.validate_new_version.outputs.branch_name == 'master' &&
+          github.event_name == 'push'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{env.PLANNED_VERSION}}
+          release_name: v${{env.PLANNED_VERSION}}
+          body_path: ${{steps.generate_changelog.outputs.release_changelog_filename}}
+          draft: false
+          prerelease: false
+
+
+      - name: List artifacts from JFrog Artifactory
+        id: list_artifacts
+        shell: bash
+        run: >-
+          curl
+          -o list_artifacts_result.json
+          -X POST
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          -H "Content-Type: text/plain"
+          -d "@artifactory/search_tdlib.aql"
+          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/aql"
+
+          jq '.results[].name' < list_artifacts_result.json | tee artifact_names.txt
+
+          cat -n artifact_names.txt
+
+          echo "::set-output name=artifact_names_file::artifact_names.txt"
+
+
+      - name: Download artifacts
+        id: download_artifacts
+        shell: bash
+        run: >-
+
+          while read artifact; do
+
+            echo "Downloading artifact ${artifact}"
+
+            curl
+            -o "${artifact}"
+            -X GET
+            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+            "${{ secrets.ARTIFACTORY_REPO_URL }}/${artifact}"
+          
+          done <<< "${{ steps.list_artifacts.outputs.artifact_names_file }}"
+
+
+      - name: Upload Release Assets
+        id: upload_release_assets
+        shell: bash
+        run: >-
+          while read artifact; do
+            echo "Processing artifact ${artifact}"
+
+            curl
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+            -H "Content-Type: application/octet-stream"
+            --data-binary "@${artifact}"
+            "${{ steps.create_release.outputs.upload_url }}?name=${artifact}"
+
+          done <<< "${{ steps.list_artifacts.outputs.artifact_names_file }}"
+
+
+      - name: Notify about release
+        uses: rest-gateway/notification-action@master
+        with:
+          message: |
+            <b>Release ${{env.APP_NAME}} ${{env.PLANNED_VERSION}}:</b>
+
+            <b>Artifactory:</b>
+            ${{ secrets.ARTIFACTORY_REPO_URL }}
+
+            <b>Release:</b>
+            https://github.com/${{ github.repository }}/releases/tag/${{env.PLANNED_VERSION}}
+
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+...
