@@ -89,7 +89,10 @@ resource "vultr_instance" "ghr-redhat-7" {
         inline = [
             "yum install -y epel-release",
             "yum install -y ansible",
-            "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/001_initialise.yml infra/ansible/030_containers.yml infra/ansible/040_github_runner.yml"
+            "ansible-galaxy collection install containers.podman"
+            "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/001_initialise.yml"
+            "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/030_containers.yml"
+            "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/040_github_runner.yml"
         ]
 
     }
