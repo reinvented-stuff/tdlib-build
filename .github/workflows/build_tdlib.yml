@@ -21,7 +21,8 @@ jobs:
         uses: rest-gateway/notification-action@master
         with:
           message: |
-            Repository: ${{ github.repository }}
+            Repository: ${GITHUB_REPOSITORY}
+            Workflow: ${GITHUB_WORKFLOW}
             Triggered on push to '${GITHUB_REF#refs/heads/}'
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
@@ -83,10 +84,11 @@ jobs:
       CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
       TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
-      APP_NAME: "plugin-echo-conveyor"
+      APP_NAME: "tdlib"
       REF: "${{ matrix.version.ref }}"
       TARGETARCH: "amd64"
-      ARTIFACT_NAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}.tar.gz"
+      ARTIFACT_BASENAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ env.TARGETARCH }}"
+      ARTIFACT_TARGZ_NAME: "${{ env.ARTIFACT_BASENAME }}.tar.gz"
 
     steps:
 
@@ -130,7 +132,9 @@ jobs:
         id: compress_binaries
         shell: bash
         run: |
-          tar -zvcf "${{ env.ARTIFACT_NAME }}" td/tdlib
+          mkdir -v "${{ env.ARTIFACT_BASENAME }}"
+          mv -Rv td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
+          tar -zvcf "${{ env.ARTIFACT_TARGZ_NAME }}" "${{ env.ARTIFACT_BASENAME }}"
 
 
       - name: Upload a Build Artifact
@@ -141,5 +145,16 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+
+      - name: Upload artifact to JFrog Artifactory
+        id: upload_to_artifactory
+        shell: bash
+        run: >-
+          curl
+          -o upload_to_artifactory_result.json
+          -X PUT
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          -T "${{ env.ARTIFACT_TARGZ_NAME }}"
+          "${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}"
 
 ...
