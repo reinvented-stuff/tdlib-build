@@ -89,7 +89,7 @@ jobs:
       APP_NAME: "tdlib"
       REF: "${{ matrix.version.ref }}"
       ARTIFACT_BASENAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
-      ARTIFACT_TARGZ_NAME: "${{ env.ARTIFACT_BASENAME }}.tar.gz"
+      ARTIFACT_TARGZ_NAME: tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
 
     steps:
 
