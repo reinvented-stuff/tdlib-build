@@ -21,7 +21,7 @@ jobs:
         uses: rest-gateway/notification-action@master
         with:
           message: |
-            <b>Workflow:</b>   ${GITHUB_WORKFLOW}
+            <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
             <b>Repository:</b> ${GITHUB_REPOSITORY}
             Triggered on push to '${GITHUB_REF#refs/heads/}'
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           mkdir -v "${{ env.ARTIFACT_BASENAME }}"
-          mv -rv td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
+          mv -v td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
           tar -zvcf "${{ env.ARTIFACT_TARGZ_NAME }}" "${{ env.ARTIFACT_BASENAME }}"
 
 
