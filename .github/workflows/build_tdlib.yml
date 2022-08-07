@@ -68,7 +68,7 @@ jobs:
       matrix:
         version:
           - ref: ${{ needs.validate_new_version.outputs.planned_version }}
-          - ref: master
+          # - ref: master
         runs-on:
 
           - os: redhat-8
