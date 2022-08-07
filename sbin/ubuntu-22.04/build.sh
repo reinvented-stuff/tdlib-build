@@ -7,11 +7,6 @@ set -e
 
 echo "Start building"
 
-mkdir -pv td/tdlib
-echo "${HOSTNAME}" >> td/tdlib/dummy 
-
-exit 0
-
 cd td
 
 rm -vrf build
