@@ -25,5 +25,7 @@ users:
     shell: "/bin/bash"
     groups: "wheel"
     ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILKF94wuU4G+Lr2qZyawGGsFp45Oo0k/EQL6HhtNyFiM"
+    extra_ssh_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/IsmDgWqNct6LCv3oj3G7dewoUzPcVzeastNLfl++qc24ABV2CHJpWDuDkcgq7ASC4jJKiETXSRsA48gFYaj0cIUrIiMxW+m5G0qvKsG/w9LQ8LXJXzSkVvgYRHF/HZWiUuq1j3JEtX4KlpOda8eDMdeRcNuxFGywsuQefLeCwfcGxKA6tfOwYn9GEASjPQyOXNfEDoheB0QcvmaQPeGX8kD6K+Ndqe7E/OKcYSFjUfysrPkk0EE4BaYVLN1fvGIPcaIcJzT7jc37YTVx9h/vkDIANErVpap+mHz2Ec079HgcMrRk3qjGrdTAv2qN1gC2G/dIe0anXjNWMjKq04Sj pavelkim@laptop"
 
 ...
