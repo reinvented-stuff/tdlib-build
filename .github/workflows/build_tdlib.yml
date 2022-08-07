@@ -193,7 +193,7 @@ jobs:
 
             echo "Downloading artifact ${artifact}"
 
-            curl
+          curl
           -vv
           -o "tmp/${artifact}"
           -X GET
