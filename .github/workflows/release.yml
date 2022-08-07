@@ -117,12 +117,12 @@ jobs:
 
             echo "Downloading artifact ${artifact}"
 
-            curl
-            -vv
-            -o "${artifact}"
-            -X GET
-            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-            "${artifact_url}"
+          curl
+          -s
+          -o "${artifact}"
+          -X GET
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          "${artifact_url}"
 
           done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
@@ -183,11 +183,11 @@ jobs:
 
             echo "Processing artifact ${artifact}"
 
-            curl
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-            -H "Content-Type: application/octet-stream"
-            --data-binary "@${artifact}"
-            "${{ steps.create_release.outputs.upload_url }}?name=${artifact}"
+          curl
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+          -H "Content-Type: application/octet-stream"
+          --data-binary "@${artifact}"
+          "${{ steps.create_release.outputs.upload_url }}?name=${artifact}"
 
           done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
