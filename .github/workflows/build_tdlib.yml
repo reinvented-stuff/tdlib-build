@@ -74,6 +74,10 @@ jobs:
             label: linux-rhel7
             arch: amd64
 
+          - os: rocky8
+            label: linux-rhel8
+            arch: amd64
+
           # - os: ubuntu-22.04
           #   label: linux-ubuntu-22.04
           #   arch: amd64
