@@ -71,8 +71,10 @@ jobs:
         runs-on:
           - os: ubuntu-22.04
             label: linux
+            arch: amd64
           - os: macos-12
             label: macos
+            arch: amd64
     runs-on: ${{ matrix.runs-on.os }}
 
     needs:
@@ -86,8 +88,7 @@ jobs:
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
       APP_NAME: "tdlib"
       REF: "${{ matrix.version.ref }}"
-      TARGETARCH: "amd64"
-      ARTIFACT_BASENAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ env.TARGETARCH }}"
+      ARTIFACT_BASENAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
       ARTIFACT_TARGZ_NAME: "${{ env.ARTIFACT_BASENAME }}.tar.gz"
 
     steps:
