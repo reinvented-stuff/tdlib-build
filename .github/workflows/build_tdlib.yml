@@ -21,8 +21,8 @@ jobs:
         uses: rest-gateway/notification-action@master
         with:
           message: |
-            Repository: ${GITHUB_REPOSITORY}
-            Workflow: ${GITHUB_WORKFLOW}
+            <b>Workflow:</b>   ${GITHUB_WORKFLOW}
+            <b>Repository:</b> ${GITHUB_REPOSITORY}
             Triggered on push to '${GITHUB_REF#refs/heads/}'
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           mkdir -v "${{ env.ARTIFACT_BASENAME }}"
-          mv -Rv td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
+          mv -rv td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
           tar -zvcf "${{ env.ARTIFACT_TARGZ_NAME }}" "${{ env.ARTIFACT_BASENAME }}"
 
 
@@ -157,5 +157,25 @@ jobs:
           -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
           -T "${{ env.ARTIFACT_TARGZ_NAME }}"
           "${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}"
+
+
+      - name: Send notification on finish
+        uses: rest-gateway/notification-action@master
+        with:
+          message: |
+            <b>Workflow:</b>   ${GITHUB_WORKFLOW}
+            <b>Repository:</b> ${GITHUB_REPOSITORY}
+            
+            <b>Matrix:</b>
+            Ref: ${{ matrix.version.ref }}
+            Label: ${{ matrix.runs-on.label }}
+            Arch: ${{ matrix.runs-on.arch }}
+            
+            <b>Artifact:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
 
 ...
