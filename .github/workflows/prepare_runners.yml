@@ -1,0 +1,77 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:truthy
+
+name: Prepare Github Runners
+
+on:
+  workflow_run:
+    workflows:
+      - "Build*"
+    types:
+      - requested
+
+
+jobs:
+
+  provision_runners:
+    name: Spin up build runners
+    runs-on: ubuntu-latest
+    outputs:
+      job_status: ${{ job.status }}
+
+    continue-on-error: true
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+
+      - name: Setup Terraform
+        id: setup_terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+          # cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+
+      - name: Terraform Init
+        id: terraform_init
+        shell: bash
+        run: terraform init
+
+
+      - name: Terraform Validate
+        id: terraform_validate
+        shell: bash
+        run: terraform validate -no-color
+
+      - name: Retrieve Github Runner registration token
+        id: get_runner_token
+        shell: bash
+        run: >-
+          curl
+          -o "get_runner_token_result.json"
+          -v
+          -X POST
+          -H "Accept: application/vnd.github+json"
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"
+          "https://api.github.com/orgs/${GITHUB_REPOSITORY_OWNER}/actions/runners/registration-token"
+
+          jq < "get_runner_token_result.json"
+
+
+      - name: Terraform Apply
+        id: terraform_apply
+        shell: bash
+        working-directory: infra/terraform
+        env:
+          TF_VAR_ansible_ghr_token: "stub"
+          TF_VAR_github_runners_count: 1
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+        run: terraform apply -auto-approve -input=false
+
+...

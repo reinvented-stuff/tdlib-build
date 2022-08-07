@@ -70,11 +70,8 @@ jobs:
           - ref: ${{ needs.validate_new_version.outputs.planned_version }}
           - ref: master
         runs-on:
-          - os: centos7
-            label: linux-rhel7
-            arch: amd64
 
-          - os: rocky8
+          - os: rhel-8
             label: linux-rhel8
             arch: amd64
 
