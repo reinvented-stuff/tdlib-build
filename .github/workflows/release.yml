@@ -118,7 +118,7 @@ jobs:
             echo "Downloading artifact ${artifact}"
 
             curl
-            -s
+            -vv
             -o "${artifact}"
             -X GET
             -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"

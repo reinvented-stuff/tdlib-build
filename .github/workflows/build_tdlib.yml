@@ -160,19 +160,62 @@ jobs:
           "${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}"
 
 
+
+      - name: List artifacts from JFrog Artifactory
+        id: list_artifacts
+        shell: bash
+        run: >-
+          curl
+          -o list_artifacts_result.json
+          -X GET
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          -H "Content-Type: text/plain"
+          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/artifact?repos=${{ env.APP_NAME }}&name=${{ env.PLANNED_VERSION }}"
+
+
+          jq -r '.results[].uri' < list_artifacts_result.json | tee artifact_urls.txt
+
+          cat -n artifact_urls.txt
+
+          echo "::set-output name=artifact_urls_file::artifact_urls.txt"
+
+
+      - name: Download artifacts
+        id: download_artifacts
+        shell: bash
+        run: >-
+
+          mkdir -pv tmp
+
+          while read artifact_url; do
+
+            artifact=$(basename "${artifact_url}")
+
+            echo "Downloading artifact ${artifact}"
+
+            curl
+            -vv
+            -o "tmp/${artifact}"
+            -X GET
+            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+            "${artifact_url}"
+
+          done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
+
+
       - name: Send notification on finish
         uses: rest-gateway/notification-action@master
         with:
           message: |
             <b>Workflow:</b>   ${GITHUB_WORKFLOW}
             <b>Repository:</b> ${GITHUB_REPOSITORY}
-            
+
             <b>Matrix:</b>
             Ref: ${{ matrix.version.ref }}
             Label: ${{ matrix.runs-on.label }}
             Arch: ${{ matrix.runs-on.arch }}
 
-            <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>            
+            <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
             <b>Artifact:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
