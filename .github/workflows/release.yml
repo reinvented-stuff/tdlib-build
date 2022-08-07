@@ -124,7 +124,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
             "${artifact_url}"
 
-          done <<< "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
+          done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
 
       - name: Generate changelog
@@ -189,7 +189,7 @@ jobs:
             --data-binary "@${artifact}"
             "${{ steps.create_release.outputs.upload_url }}?name=${artifact}"
 
-          done <<< "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
+          done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
 
       - name: Notify about release
