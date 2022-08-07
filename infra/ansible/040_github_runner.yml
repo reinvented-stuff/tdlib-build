@@ -45,3 +45,19 @@
           --labels "{{ linux_os_family }}"
           --url https://github.com/reinvented-stuff
           --token "{{ ghr_token }}"
+
+    - name: Setup actions-runner service
+      become: yes
+      shell:
+        chdir: /opt/actions-runner
+        cmd: >-
+          ./svc.sh install ghr
+
+    - name: Start actions-runner service
+      become: yes
+      shell:
+        chdir: /opt/actions-runner
+        cmd: >-
+          ./svc.sh start
+
+...
