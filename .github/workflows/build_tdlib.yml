@@ -194,11 +194,11 @@ jobs:
             echo "Downloading artifact ${artifact}"
 
             curl
-            -vv
-            -o "tmp/${artifact}"
-            -X GET
-            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-            "${artifact_url}"
+          -vv
+          -o "tmp/${artifact}"
+          -X GET
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          "${artifact_url}"
 
           done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
