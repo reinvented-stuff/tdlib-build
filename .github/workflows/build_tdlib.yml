@@ -70,8 +70,8 @@ jobs:
           - ref: ${{ needs.validate_new_version.outputs.planned_version }}
           - ref: master
         runs-on:
-          - os: [self-hosted, rocky8]
-            label: linux-rhel8
+          - os: centos7
+            label: linux-rhel7
             arch: amd64
 
           # - os: ubuntu-22.04
