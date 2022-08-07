@@ -113,7 +113,7 @@ jobs:
 
           while read artifact_url; do
 
-            artifact=$(basename "${artifact}")
+            artifact=$(basename "${artifact_url}")
 
             echo "Downloading artifact ${artifact}"
 
@@ -123,7 +123,7 @@ jobs:
             -X GET
             -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
             "${artifact_url}"
-          
+
           done <<< "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
 
@@ -179,7 +179,7 @@ jobs:
         run: >-
           while read artifact_url; do
 
-            artifact=$(basename "${artifact}")
+            artifact=$(basename "${artifact_url}")
 
             echo "Processing artifact ${artifact}"
 
