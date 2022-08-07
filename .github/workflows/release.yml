@@ -87,6 +87,46 @@ jobs:
           fetch-depth: 0
 
 
+      - name: List artifacts from JFrog Artifactory
+        id: list_artifacts
+        shell: bash
+        run: >-
+          curl
+          -o list_artifacts_result.json
+          -X GET
+          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+          -H "Content-Type: text/plain"
+          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/artifact?repos=${{ env.APP_NAME }}&name=${{ env.PLANNED_VERSION }}"
+
+
+          jq -r '.results[].uri' < list_artifacts_result.json | tee artifact_urls.txt
+
+          cat -n artifact_urls.txt
+
+          echo "::set-output name=artifact_urls_file::artifact_urls.txt"
+
+
+      - name: Download artifacts
+        id: download_artifacts
+        shell: bash
+        run: >-
+
+          while read artifact_url; do
+
+            artifact=$(basename "${artifact}")
+
+            echo "Downloading artifact ${artifact}"
+
+            curl
+            -s
+            -o "${artifact}"
+            -X GET
+            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
+            "${artifact_url}"
+          
+          done <<< "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
+
+
       - name: Generate changelog
         id: generate_changelog
         uses: reinvented-stuff/changelog-render-action@master
@@ -133,48 +173,14 @@ jobs:
           prerelease: false
 
 
-      - name: List artifacts from JFrog Artifactory
-        id: list_artifacts
-        shell: bash
-        run: >-
-          curl
-          -o list_artifacts_result.json
-          -X POST
-          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-          -H "Content-Type: text/plain"
-          -d "@artifactory/search_tdlib.aql"
-          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/aql"
-
-          jq '.results[].name' < list_artifacts_result.json | tee artifact_names.txt
-
-          cat -n artifact_names.txt
-
-          echo "::set-output name=artifact_names_file::artifact_names.txt"
-
-
-      - name: Download artifacts
-        id: download_artifacts
-        shell: bash
-        run: >-
-
-          while read artifact; do
-
-            echo "Downloading artifact ${artifact}"
-
-            curl
-            -o "${artifact}"
-            -X GET
-            -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-            "${{ secrets.ARTIFACTORY_REPO_URL }}/${artifact}"
-          
-          done <<< "${{ steps.list_artifacts.outputs.artifact_names_file }}"
-
-
       - name: Upload Release Assets
         id: upload_release_assets
         shell: bash
         run: >-
-          while read artifact; do
+          while read artifact_url; do
+
+            artifact=$(basename "${artifact}")
+
             echo "Processing artifact ${artifact}"
 
             curl
@@ -183,7 +189,7 @@ jobs:
             --data-binary "@${artifact}"
             "${{ steps.create_release.outputs.upload_url }}?name=${artifact}"
 
-          done <<< "${{ steps.list_artifacts.outputs.artifact_names_file }}"
+          done <<< "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
 
       - name: Notify about release
