@@ -38,6 +38,18 @@ According to the official documentation the compiled library should be usable wi
 * C
 * G
 
+# Dependencies
+
+* glibc 2.29
+* openssl3
+
+# Github Runners
+
+* redhat-7
+* redhat-8
+* ubuntu-22.04
+* macos-12
+
 # Usage
 
 Official usage examples: https://github.com/tdlib/td/tree/master/example

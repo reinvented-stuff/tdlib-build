@@ -21,7 +21,7 @@ cd ..
 php SplitSource.php
 
 cd build
-cmake --build . --target install
+cmake --build . --target install -- -j 4
 
 cd ..
 php SplitSource.php --undo

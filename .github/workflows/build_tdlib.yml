@@ -71,8 +71,12 @@ jobs:
           - ref: master
         runs-on:
 
-          - os: rhel-8
-            label: linux-rhel8
+          - os: redhat-8
+            label: linux-redhat-8
+            arch: amd64
+
+          - os: redhat-7
+            label: linux-redhat-7
             arch: amd64
 
           # - os: ubuntu-22.04

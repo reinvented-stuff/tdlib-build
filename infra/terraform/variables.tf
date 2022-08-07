@@ -14,12 +14,17 @@ variable "github_runners_region" {
 
 variable "github_runners_plan" {
   type = string
-  default = "vhp-2c-2gb-intel"
+  default = "vhp-4c-8gb-intel"
 }
 
 variable "ansible_repo" {
   type = string
   default = "https://github.com/reinvented-stuff/tdlib-build"
+}
+
+variable "ssh_private_key" {
+  type = string
+  default = "id_rsa"
 }
 
 variable "ansible_repo_ref" {
