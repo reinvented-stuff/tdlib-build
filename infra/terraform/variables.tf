@@ -26,3 +26,8 @@ variable "ansible_repo_ref" {
   type = string
   default = "dev"
 }
+
+variable "ansible_ghr_token" {
+  type = string
+  default = "dummy"
+}

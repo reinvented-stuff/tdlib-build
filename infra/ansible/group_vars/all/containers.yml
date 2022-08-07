@@ -3,7 +3,7 @@
 podman_containers:
   - name: node_exporter
     image: quay.io/prometheus/node-exporter:latest
-    state: present
+    state: started
     network: host
     pid: host
     cmd_args:
