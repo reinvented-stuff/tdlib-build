@@ -1,0 +1,32 @@
+---
+
+- name: Setup systemd services
+  block: 
+
+    - name: Configure systemd services for host
+      systemd:
+        state: "{{ item.state | default(omit) }}"
+        name: "{{ item.name | default(omit) }}"
+        daemon_reload: "{{ item.daemon_reload | default(omit) }}"
+        daemon_reexec: "{{ item.daemon_reexec | default(omit) }}"
+        enabled: "{{ item.enabled | default(omit) }}"
+        masked: "{{ item.masked | default(omit) }}"
+      with_items: 
+        - "{{ systemd_services_host }}"
+
+    - name: Configure systemd services for group
+      systemd:
+        state: "{{ item.state | default(omit) }}"
+        name: "{{ item.name | default(omit) }}"
+        daemon_reload: "{{ item.daemon_reload | default(omit) }}"
+        daemon_reexec: "{{ item.daemon_reexec | default(omit) }}"
+        enabled: "{{ item.enabled | default(omit) }}"
+        masked: "{{ item.masked | default(omit) }}"
+      with_items: 
+        - "{{ systemd_services_group }}"
+
+  tags:
+    - systemd
+    - services
+
+...

@@ -1,0 +1,27 @@
+---
+
+- name: Setup sysctl parameters
+  block: 
+    
+    - name: Configure sysctl parameters for group
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_set: yes
+        reload: yes
+      with_dict: "{{ sysctl_params_group }}"
+
+    - name: Configure sysctl parameters for host
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_set: yes
+        reload: yes
+      with_dict: "{{ sysctl_params_host }}"
+
+  tags:
+    - sysctl
+
+...

@@ -1,0 +1,22 @@
+---
+sysctl_params_global: []
+sysctl_params_group: []
+sysctl_params_host: []
+
+yum_packages_global: []
+yum_packages_group: []
+yum_packages_host: []
+yum_repo_packages_global: []
+yum_repo_packages_group: []
+yum_repo_packages_host: []
+
+systemd_services_host: []
+systemd_services_group: []
+
+nameservers:
+  - 8.8.8.8
+
+swap_file_enabled: no
+swap_file_path: /swap
+swap_file_size_mb: 1024
+...

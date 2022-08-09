@@ -1,0 +1,41 @@
+- name: Manage containers
+  hosts: all
+  gather_facts: yes
+  become: yes
+  strategy: free
+
+  tasks:
+    - name: Gather facts on several containers
+      containers.podman.podman_container_info:
+        name: "{{ item.name }}"
+      register: containers_info
+      with_items: "{{ podman_containers }}"
+
+    - name: Print out current containers info
+      debug:
+        var: containers_info['results'] | selectattr('containers') | selectattr("Name") | list
+
+    - name: Create required directories
+      file:
+        path: "{{ item.path }}"
+        owner: "{{ item.owner | default(omit) }}"
+        group: "{{ item.group | default(omit) }}"
+        state: directory
+      loop: "{{ podman_containers_mkdir | default([]) }}"
+
+
+    - name: Run containers
+      containers.podman.podman_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: "{{ item.state | default('present') }}"
+        recreate: "{{ recreate | default(omit) }}"
+        command: "{{ command | default(omit) }}"
+        network: "{{ item.network | default('host') }}"
+        pid: "{{ item.pid | default('host') }}"
+        ports: "{{ item.ports | default(omit) }}"
+        volumes: "{{ item.volumes | default(omit) }}"
+        env: "{{ item.env | default(omit) }}"
+        log_options: "{{ log_options | default(omit) }}"
+        log_driver: "{{ log_driver | default(omit) }}"
+      with_items: "{{ podman_containers }}"

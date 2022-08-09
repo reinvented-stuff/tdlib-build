@@ -1,0 +1,14 @@
+galaxy_info:
+  author: Pavel Kim
+  description: Initialises auth subsystem of a linux server
+  license: GPLv3
+  
+  min_ansible_version: 1.2
+
+  galaxy_tags:
+    - rhel
+    - centos
+    - linux
+
+dependencies: []
+
