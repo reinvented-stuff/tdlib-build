@@ -59,13 +59,24 @@ jobs:
           fail_on_error: false
 
 
+      - name: Check out tdlib repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: tdlib/td
+          path: td
+
+
       - name: Retreive tdlib commit corresponding to the planned version
         id: get_version_commit
         shell: bash
         run: >-
-          VERSION_COMMIT=$( git log
+          VERSION_COMMIT=$(
+          git -C td
+          log
           --pretty="format:%H"
-          --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}" )
+          --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}"
+          )
 
           echo "::set-output name=version_commit::${VERSION_COMMIT}"
 
