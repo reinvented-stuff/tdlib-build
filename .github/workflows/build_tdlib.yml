@@ -167,12 +167,11 @@ jobs:
 
 
       - name: Check out tdlib repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          repository: tdlib/td
-          ref: "${{ env.PLANNED_VERSION_COMMIT }}"
-          path: td
+        id: checkout_tdlib_repo
+        shell: bash
+        run: |
+          mkdir -pv td
+          git clone https://github.com/tdlib/td.git td
 
 
       - name: Print out directory contents
