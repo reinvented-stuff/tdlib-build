@@ -64,6 +64,7 @@ jobs:
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      PLANNED_RELEASE_NAME: v${{ needs.validate_new_version.outputs.planned_version }}
       TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
       CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
       TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
@@ -176,7 +177,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{env.PLANNED_VERSION}}
-          release_name: ${{env.PLANNED_VERSION}}
+          release_name: ${{env.PLANNED_RELEASE_NAME}}
           body_path: ${{steps.generate_changelog.outputs.release_changelog_filename}}
           draft: false
           prerelease: false
@@ -205,7 +206,7 @@ jobs:
         uses: rest-gateway/notification-action@master
         with:
           message: >-
-            <b>Release ${{env.APP_NAME}} ${{env.PLANNED_VERSION}}:</b>
+            <b>Release ${{env.APP_NAME}} ${{env.PLANNED_RELEASE_NAME}}:</b>
 
             <b>Artifactory:</b>
             <code>${{ secrets.ARTIFACTORY_REPO_URL }}</code>

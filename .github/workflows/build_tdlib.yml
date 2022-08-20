@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       planned_version: ${{ steps.validate_new_version.outputs.planned_version }}
+      planned_version_commit: ${{ steps.get_version_commit.outputs.version_commit }}
       version_file_exists: ${{ steps.validate_new_version.outputs.version_file_exists }}
       tag_hash: ${{ steps.validate_new_version.outputs.tag_hash }}
       can_create: ${{ steps.validate_new_version.outputs.can_create }}
@@ -49,7 +50,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Use latest released action
         id: validate_new_version
         uses: reinvented-stuff/validate-version-action@master
@@ -59,6 +59,42 @@ jobs:
           fail_on_error: false
 
 
+      - name: Check out tdlib repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: tdlib/td
+          path: td
+
+
+      - name: Retreive tdlib commit corresponding to the planned version
+        id: get_version_commit
+        shell: bash
+        run: >-
+          VERSION_COMMIT=$(
+          git -C td
+          log
+          --pretty="format:%H"
+          --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}"
+          )
+
+          echo "::set-output name=version_commit::${VERSION_COMMIT}"
+
+
+      - name: Make sure commit exists for the planned version
+        id: check_commit_exists
+        shell: bash
+        run: >-
+          if [[ -z "${{ steps.get_version_commit.outputs.version_commit }}" ]]; then
+            
+            echo "Couldn't find commit
+          for planned version '${{ steps.validate_new_version.outputs.planned_version }}':
+          '${{ steps.get_version_commit.outputs.version_commit }}'"
+            
+            exit 127
+
+          fi
+
   build_matrix:
     name: Build Multi-platform
     outputs:
@@ -66,9 +102,8 @@ jobs:
       artifact_name: ${{ steps.set_artifact_name.outputs.name }}
     strategy:
       matrix:
-        version:
-          - ref: ${{ needs.validate_new_version.outputs.planned_version }}
-          # - ref: master
+        version: 
+          - ${{ needs.validate_new_version.outputs.planned_version }}
         runs-on:
 
           - os: redhat-8
@@ -79,9 +114,9 @@ jobs:
             label: linux-redhat-7
             arch: amd64
 
-          # - os: ubuntu-22.04
-          #   label: linux-ubuntu-22.04
-          #   arch: amd64
+          - os: ubuntu-22.04
+            label: linux-ubuntu-22.04
+            arch: amd64
 
           # - os: ubuntu-18.04
           #   label: linux-ubuntu-18.04
@@ -98,6 +133,8 @@ jobs:
           # - os: macos-10.15
           #   label: macos10.15
           #   arch: amd64
+
+
     runs-on: ${{ matrix.runs-on.os }}
 
     needs:
@@ -105,14 +142,14 @@ jobs:
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
       TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
       CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
       TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
       APP_NAME: "tdlib"
-      REF: "${{ matrix.version.ref }}"
-      ARTIFACT_BASENAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
-      ARTIFACT_TARGZ_NAME: "tdlib-${{ matrix.version.ref }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
+      ARTIFACT_BASENAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
+      ARTIFACT_TARGZ_NAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
 
     steps:
 
@@ -130,12 +167,11 @@ jobs:
 
 
       - name: Check out tdlib repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          repository: tdlib/td
-          ref: "${{ env.REF }}"
-          path: td
+        id: checkout_tdlib_repo
+        shell: bash
+        run: |
+          mkdir -pv td
+          git clone https://github.com/tdlib/td.git td
 
 
       - name: Print out directory contents
@@ -191,7 +227,7 @@ jobs:
           -X GET
           -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
           -H "Content-Type: text/plain"
-          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/artifact?repos=${{ env.APP_NAME }}&name=${{ matrix.version.ref }}"
+          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/artifact?repos=${{ env.APP_NAME }}&name=${{ matrix.version }}"
 
           jq -r '.results[].uri' < list_artifacts_result.json
 
@@ -206,7 +242,9 @@ jobs:
 
             <b>Matrix:</b>
 
-            Ref: ${{ matrix.version.ref }}
+            Version: ${{ matrix.version }}
+            
+            Ref: ${{ env.PLANNED_VERSION_COMMIT }}
 
             Label: ${{ matrix.runs-on.label }}
 
