@@ -10,8 +10,8 @@ on:
 
 jobs:
 
-  notify_started:
-    name: Send notification on start
+  upload_to_artifactory:
+    name: Upload artifact to Artifactory
     runs-on: ubuntu-latest
 
     steps:
