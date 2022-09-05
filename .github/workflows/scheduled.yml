@@ -80,7 +80,7 @@ jobs:
 
       - name: Send notification if versions don't match
         uses: rest-gateway/notification-action@master
-        if: ${{ steps.match_versions.outputs.match }} == 0
+        if: ${{ steps.match_versions.outputs.match }} == "0"
         with:
           message: |
             Repository: ${GITHUB_REPOSITORY}
