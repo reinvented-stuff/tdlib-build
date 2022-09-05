@@ -35,7 +35,58 @@ jobs:
           fetch-depth: 0
 
 
-      - name: Upload version file to JFrog Artifactory
+      - name: Check out tdlib repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: tdlib/td
+          path: td
+
+
+      - name: Retreive last tdlib version from commit history
+        id: get_last_version
+        shell: bash
+        run: >-
+          LAST_VERSION=$(
+          git -C td
+          log
+          --pretty="format:%s"
+          --grep="Update version to" |
+          cut -d " " -f 4 |
+          head -1
+          )
+
+          echo "::set-output name=last_version::${LAST_VERSION}"
+
+
+      - name: Match last tdlib version with .version contents
+        id: match_versions
+        shell: bash
+        run: >-
+          PLANNED_VERSION="$( cat .version )"
+          
+          if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
+            echo "::set-output name=match::1"
+          else
+            echo "::set-output name=match::0"
+          fi
+
+
+      - name: Send notification if versions don't match
+        uses: rest-gateway/notification-action@master
+        if: ${{ steps.match_versions.outputs.match }} == 0
+        with:
+          message: |
+            Repository: ${GITHUB_REPOSITORY}
+            Workflow: ${GITHUB_WORKFLOW}
+            Scheduled run found unmatched latest version: ${{ steps.get_last_version.outputs.last_version }}
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+      - name: Upload .version file to JFrog Artifactory
         id: upload_to_artifactory
         shell: bash
         run: >-
