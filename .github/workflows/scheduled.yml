@@ -7,7 +7,7 @@ name: Scheduled
 on:
   schedule:
     - cron: '35 15 * * *'
-    - cron: '45 * * * *'
+    - cron: '20 * * * *'
 
 jobs:
 
@@ -65,6 +65,8 @@ jobs:
         shell: bash
         run: >-
           PLANNED_VERSION="$( cat .version )"
+
+          echo "PLANNED_VERSION=${PLANNED_VERSION}"
 
           if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
             echo "::set-output name=match::1"
