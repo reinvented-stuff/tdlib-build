@@ -69,18 +69,16 @@ jobs:
         run: >-
           PLANNED_VERSION="$( cat .version )"
 
-          echo -e "PLANNED_VERSION='${PLANNED_VERSION}'"
-
           if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
-            echo "::set-output name=match::1"
+            echo "::set-output name=match::true"
           else
-            echo "::set-output name=match::0"
+            echo "::set-output name=match::false"
           fi
 
 
       - name: Send notification if versions don't match
         uses: rest-gateway/notification-action@master
-        if: steps.match_versions.outputs.match == "0"
+        if: steps.match_versions.outputs.match == 'false'
         with:
           message: |
             Repository: ${GITHUB_REPOSITORY}
