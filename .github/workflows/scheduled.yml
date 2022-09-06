@@ -11,7 +11,7 @@ on:
 jobs:
 
   upload_to_artifactory:
-    name: Upload artifact to Artifactory
+    name: Check for new TDLib versions
     runs-on: ubuntu-latest
 
     steps:
@@ -86,7 +86,7 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
-      - name: Upload .version file to JFrog Artifactory
+      - name: Upload .version file to JFrog Artifactory (to keep the account alive)
         id: upload_to_artifactory
         shell: bash
         run: >-
