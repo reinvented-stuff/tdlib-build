@@ -7,10 +7,6 @@ name: Scheduled
 on:
   schedule:
     - cron: '35 15 * * *'
-    - cron: '20 * * * *'
-  push:
-    branches:
-      - 'feature/scheduled-build'
 
 jobs:
 
