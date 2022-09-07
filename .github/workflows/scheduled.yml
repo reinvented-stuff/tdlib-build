@@ -67,8 +67,10 @@ jobs:
 
           if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
             echo "::set-output name=match::true"
+            echo "::set-output name=caption::No new version found"
           else
             echo "::set-output name=match::false"
+            echo "::set-output name=caption::Scheduled run found new version: ${{ steps.get_last_version.outputs.last_version }}"
           fi
 
 
@@ -79,7 +81,7 @@ jobs:
           message: |
             Repository: ${GITHUB_REPOSITORY}
             Workflow: ${GITHUB_WORKFLOW}
-            Scheduled run found unmatched latest version: ${{ steps.get_last_version.outputs.last_version }}
+            ${{ steps.match_versions.outputs.caption }}
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
           rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
