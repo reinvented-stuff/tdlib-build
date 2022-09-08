@@ -74,9 +74,8 @@ jobs:
           fi
 
 
-      - name: Send notification if versions don't match
+      - name: Send notification with version lookup results
         uses: rest-gateway/notification-action@master
-        if: steps.match_versions.outputs.match == 'false'
         with:
           message: |
             Repository: ${GITHUB_REPOSITORY}
