@@ -29,7 +29,7 @@ variable "ssh_private_key" {
 
 variable "ansible_repo_ref" {
   type = string
-  default = "dev"
+  default = "master"
 }
 
 variable "ansible_ghr_token" {
