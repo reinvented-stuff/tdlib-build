@@ -190,7 +190,7 @@ jobs:
           TF_VAR_github_runners_count: 1
 
         run: |
-          terraform apply -auto-approve -no-color
+          terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
           terraform show -json > outputs.json
           
           IPv4_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv4-addresses".value[][]')
@@ -202,6 +202,7 @@ jobs:
 
       - name: Send notification with terraform outputs
         uses: rest-gateway/notification-action@master
+        if: always()
         with:
           message: |
             <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
@@ -209,13 +210,29 @@ jobs:
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
             <b>Terraform:<b>
-            ${{ steps.terraform_apply.outputs.ipv4_addresses }}
-            ${{ steps.terraform_apply.outputs.ipv6_addresses }}
+            IPv4: ${{ steps.terraform_apply.outputs.ipv4_addresses }}
+            IPv6: ${{ steps.terraform_apply.outputs.ipv6_addresses }}
+
+            <b>Outcome:<b> 
+            terraform init: ${{ steps.terraform_init.outcome }}
+            terraform plan: ${{ steps.terraform_plan.outcome }}
+            terraform apply: ${{ steps.terraform_apply.outcome }}
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
           rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+      - name: Upload terraform apply log
+        uses: actions/upload-artifact@v3.1.0
+        if: always()
+        with:
+          name: "terraform_apply.log"
+          path: "terraform_apply.log"
+          if-no-files-found: error
+          retention-days: 90
+
 
 
   build_matrix:
