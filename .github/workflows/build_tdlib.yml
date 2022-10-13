@@ -98,6 +98,9 @@ jobs:
   prepare_runners:
     name: Spin up GitHub runners
     runs-on: ubuntu-latest
+    needs:
+      - validate_new_version
+
     steps:
 
       - name: Check out this repository
@@ -107,7 +110,9 @@ jobs:
 
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1.0.1
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.11
 
 
       - name: Get GitHub runner registration token
@@ -241,6 +246,7 @@ jobs:
 
     needs:
       - validate_new_version
+      - prepare_runners
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
