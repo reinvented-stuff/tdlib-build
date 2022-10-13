@@ -95,6 +95,112 @@ jobs:
 
           fi
 
+  prepare_runners:
+    name: Spin up GitHub runners
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check out this repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.0.11
+
+
+      - name: Get GitHub runner registration token
+        id: get_ghr_token
+        shell: bash
+        run: >-
+          TOKEN=$(
+            curl
+              -X POST
+              -H "Accept: application/vnd.github+json"
+              -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
+              "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token"
+            | jq ".token"
+          )
+
+          if [[ -z "${TOKEN}" ]]; then
+
+            echo "Error while getting GitHub runner registration token!"
+
+            exit 2
+
+          else
+
+            echo "Successfully obtained GitHub runner registration token."
+            
+            echo "::set-output name=token::${TOKEN}"
+
+          fi
+
+
+      - name: Render SSH private key from a secret
+        id: ssh_private_key
+        shell: bash
+        run: >-
+          echo "${{ secrets.VULTR_RSA_PRIVATE_KEY }}" > ./id_rsa
+
+
+      - name: Terraform init
+        id: terraform_init
+        shell: bash
+        env:
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
+          TF_VAR_github_runners_count: 1
+
+        run: >-
+          terraform init
+
+
+      - name: Terraform plan
+        id: terraform_plan
+        shell: bash
+        env:
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
+          TF_VAR_github_runners_count: 1
+
+        run: >-
+          terraform plan
+
+
+      - name: Terraform apply
+        id: terraform_apply
+        shell: bash
+        env:
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
+          TF_VAR_github_runners_count: 1
+
+        run: |
+          terraform apply -auto-approve -no-color
+          OUTPUTS=$( terraform show -json | jq)
+
+          echo "::set-output name=outputs::${OUTPUTS}"
+
+
+      - name: Send notification with terraform outputs
+        uses: rest-gateway/notification-action@master
+        with:
+          message: |
+            <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
+            <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
+            <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+
+            <b>Terraform:<b>
+            ${{ steps.terraform_apply.outputs.outputs }}
+
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
   build_matrix:
     name: Build Multi-platform
     outputs:
@@ -118,21 +224,17 @@ jobs:
             label: linux-ubuntu-22.04
             arch: amd64
 
-          # - os: ubuntu-18.04
-          #   label: linux-ubuntu-18.04
-          #   arch: amd64
-
-          # - os: macos-12
-          #   label: macos12
-          #   arch: amd64
+          - os: macos-12
+            label: macos12
+            arch: amd64
 
           # - os: macos-11
           #   label: macos11
           #   arch: amd64
 
-          # - os: macos-10.15
-          #   label: macos10.15
-          #   arch: amd64
+          - os: macos-10.15
+            label: macos10.15
+            arch: amd64
 
 
     runs-on: ${{ matrix.runs-on.os }}

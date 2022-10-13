@@ -94,8 +94,20 @@ resource "vultr_instance" "ghr-redhat-7" {
             "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/030_containers.yml",
             "ansible-pull -v --diff -i localhost, -U ${var.ansible_repo} -C ${var.ansible_repo_ref} -e ghr_token=${var.ansible_ghr_token} infra/ansible/040_github_runner.yml"
         ]
-
     }
 
 }
 
+output "ipv4-addresses" {
+    value = [
+        vultr_instance.ghr-redhat-8[*].main_ip,
+        vultr_instance.ghr-redhat-7[*].main_ip,
+    ]
+}
+
+output "ipv6-addresses" {
+    value = [
+        vultr_instance.ghr-redhat-8[*].v6_main_ip,
+        vultr_instance.ghr-redhat-7[*].v6_main_ip,
+    ]
+}
