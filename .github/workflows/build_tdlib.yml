@@ -187,10 +187,14 @@ jobs:
           TF_VAR_github_runners_count: 1
 
         run: |
-          terraform apply -auto-approve -no-color
-          OUTPUTS=$( terraform show -json | jq)
+          terraform apply -auto-approve -no-color 
+          terraform show -json > outputs.json
+          
+          IPv4_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv4-addresses".value[][]')
+          IPv6_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv6-addresses".value[][]')
 
-          echo "::set-output name=outputs::${OUTPUTS}"
+          echo "::set-output name=ipv4_addresses::${IPv4_ADDRESSES}"
+          echo "::set-output name=ipv6_addresses::${IPv6_ADDRESSES}"
 
 
       - name: Send notification with terraform outputs
@@ -202,7 +206,8 @@ jobs:
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
             <b>Terraform:<b>
-            ${{ steps.terraform_apply.outputs.outputs }}
+            ${{ steps.terraform_apply.outputs.ipv4_addresses }}
+            ${{ steps.terraform_apply.outputs.ipv6_addresses }}
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
