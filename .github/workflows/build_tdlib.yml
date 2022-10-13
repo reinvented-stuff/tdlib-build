@@ -146,6 +146,7 @@ jobs:
       - name: Render SSH private key from a secret
         id: ssh_private_key
         shell: bash
+        working-directory: infra/terraform
         run: >-
           echo "${{ secrets.VULTR_RSA_PRIVATE_KEY }}" > ./id_rsa
 
@@ -153,6 +154,7 @@ jobs:
       - name: Terraform init
         id: terraform_init
         shell: bash
+        working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
@@ -165,6 +167,7 @@ jobs:
       - name: Terraform plan
         id: terraform_plan
         shell: bash
+        working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
@@ -177,6 +180,7 @@ jobs:
       - name: Terraform apply
         id: terraform_apply
         shell: bash
+        working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
