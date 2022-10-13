@@ -156,6 +156,9 @@ jobs:
         shell: bash
         working-directory: infra/terraform
         env:
+          TF_VAR_s3_endpoint: "${{ secrets.S3_ENDPOINT }}"
+          TF_VAR_s3_access_key: "${{ secrets.S3_ACCESS_KEY }}"
+          TF_VAR_s3_secret_key: "${{ secrets.S3_SECRET_KEY }}"
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
@@ -169,6 +172,9 @@ jobs:
         shell: bash
         working-directory: infra/terraform
         env:
+          TF_VAR_s3_endpoint: "${{ secrets.S3_ENDPOINT }}"
+          TF_VAR_s3_access_key: "${{ secrets.S3_ACCESS_KEY }}"
+          TF_VAR_s3_secret_key: "${{ secrets.S3_SECRET_KEY }}"
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
@@ -182,12 +188,15 @@ jobs:
         shell: bash
         working-directory: infra/terraform
         env:
+          TF_VAR_s3_endpoint: "${{ secrets.S3_ENDPOINT }}"
+          TF_VAR_s3_access_key: "${{ secrets.S3_ACCESS_KEY }}"
+          TF_VAR_s3_secret_key: "${{ secrets.S3_SECRET_KEY }}"
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
 
         run: |
-          terraform apply -auto-approve -no-color 
+          terraform apply -auto-approve -no-color
           terraform show -json > outputs.json
           
           IPv4_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv4-addresses".value[][]')
@@ -241,10 +250,6 @@ jobs:
           - os: macos-12
             label: macos12
             arch: amd64
-
-          # - os: macos-11
-          #   label: macos11
-          #   arch: amd64
 
           - os: macos-10.15
             label: macos10.15
