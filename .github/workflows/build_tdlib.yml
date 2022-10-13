@@ -239,11 +239,10 @@ jobs:
       - name: Upload terraform apply log
         uses: actions/upload-artifact@v3.1.0
         id: upload_terraform_apply_log
-        working-directory: infra/terraform
         if: always()
         with:
           name: "terraform_apply.log"
-          path: "terraform_apply.log"
+          path: "infra/terraform/terraform_apply.log"
           if-no-files-found: error
           retention-days: 90
 
