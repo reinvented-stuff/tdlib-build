@@ -120,12 +120,12 @@ jobs:
         shell: bash
         run: >-
           TOKEN=$(
-            curl
-              -X POST
-              -H "Accept: application/vnd.github+json"
-              -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
-              "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token"
-            | jq ".token"
+          curl
+          -X POST
+          -H "Accept: application/vnd.github+json"
+          -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
+          "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token"
+          | jq ".token"
           )
 
           if [[ -z "${TOKEN}" ]]; then
