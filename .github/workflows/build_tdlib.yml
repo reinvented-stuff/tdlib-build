@@ -191,10 +191,22 @@ jobs:
 
         run: |
           terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
+
+      - name: Terraform show
+        id: terraform_show
+        shell: bash
+        working-directory: infra/terraform
+        continue-on-error: true
+        env:
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
+          TF_VAR_github_runners_count: 1
+
+        run: |
           terraform show -json > outputs.json
           
-          IPv4_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv4-addresses".value[][]')
-          IPv6_ADDRESSES=$( terraform show -json | jq '.values.outputs."ipv6-addresses".value[][]')
+          IPv4_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv4-addresses".value[][]' )
+          IPv6_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv6-addresses".value[][]' )
 
           echo "::set-output name=ipv4_addresses::${IPv4_ADDRESSES}"
           echo "::set-output name=ipv6_addresses::${IPv6_ADDRESSES}"
@@ -210,8 +222,8 @@ jobs:
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
             <b>Terraform:<b>
-            IPv4: ${{ steps.terraform_apply.outputs.ipv4_addresses }}
-            IPv6: ${{ steps.terraform_apply.outputs.ipv6_addresses }}
+            IPv4: ${{ steps.terraform_show.outputs.ipv4_addresses }}
+            IPv6: ${{ steps.terraform_show.outputs.ipv6_addresses }}
 
             <b>Outcome:<b> 
             terraform init: ${{ steps.terraform_init.outcome }}
@@ -226,13 +238,14 @@ jobs:
 
       - name: Upload terraform apply log
         uses: actions/upload-artifact@v3.1.0
+        id: upload_terraform_apply_log
+        working-directory: infra/terraform
         if: always()
         with:
           name: "terraform_apply.log"
           path: "terraform_apply.log"
           if-no-files-found: error
           retention-days: 90
-
 
 
   build_matrix:
