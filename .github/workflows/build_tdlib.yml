@@ -159,7 +159,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
-
         run: >-
           terraform init
           -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
@@ -175,7 +174,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
-
         run: >-
           terraform plan
 
@@ -188,7 +186,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
-
         run: |
           terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
 
@@ -201,9 +198,8 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
-
         run: |
-          terraform show -json > outputs.json
+          ( terraform show -json ; )> "outputs.json"
           
           IPv4_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv4-addresses".value[][]' )
           IPv6_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv6-addresses".value[][]' )
@@ -221,11 +217,11 @@ jobs:
             <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
-            <b>Terraform:<b>
+            <b>Terraform:</b>
             IPv4: ${{ steps.terraform_show.outputs.ipv4_addresses }}
             IPv6: ${{ steps.terraform_show.outputs.ipv6_addresses }}
 
-            <b>Outcome:<b> 
+            <b>Outcome:</b> 
             terraform init: ${{ steps.terraform_init.outcome }}
             terraform plan: ${{ steps.terraform_plan.outcome }}
             terraform apply: ${{ steps.terraform_apply.outcome }}
