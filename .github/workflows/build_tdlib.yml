@@ -130,7 +130,7 @@ jobs:
           | jq ".token"
           )
 
-          TOKEN_FILENAME=".ghr_token"
+          TOKEN_FILENAME="${PWD}/.ghr_token"
           
           echo "${TOKEN}" > "${TOKEN_FILENAME}"
 
