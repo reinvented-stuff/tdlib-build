@@ -210,9 +210,18 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
         run: |
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+          terraform show -json
 
-          terraform show -json | tee outputs.json
+
+      - name: Parse terraform show output
+        id: parse_terraform_show
+        shell: bash
+        working-directory: infra/terraform
+        continue-on-error: true
+        run: |
+          cat <<EOF > outputs.json
+          ${{ steps.terraform_show.outputs.stdout }}
+          EOF
           
           IPv4_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv4-addresses".value[][]' )
           IPv6_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv6-addresses".value[][]' )
