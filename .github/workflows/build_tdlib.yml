@@ -226,7 +226,7 @@ jobs:
           
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
-          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + " " + .ipv4 + "  " + .ipv6' )
+          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | "<u>" + .name + "</u>:" + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
           EOF2
           EOF
 
