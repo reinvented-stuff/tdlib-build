@@ -223,11 +223,11 @@ jobs:
           ${{ steps.terraform_show.outputs.stdout }}
           EOF
           
-          IPv4_ADDRESSES=$( cat outputs.json | jq -r '.values.outputs."ipv4-addresses".value[][]' )
-          IPv6_ADDRESSES=$( cat outputs.json | jq -r '.values.outputs."ipv6-addresses".value[][]' )
-
-          echo "::set-output name=ipv4_addresses::${IPv4_ADDRESSES}"
-          echo "::set-output name=ipv6_addresses::${IPv6_ADDRESSES}"
+          echo <<EOF >> "${GITHUB_OUTPUT}"
+          instances<<EOF2
+          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + " " + .ipv4 + "  " + .ipv6' )
+          EOF2
+          EOF
 
 
       - name: Send notification with terraform outputs
@@ -239,9 +239,8 @@ jobs:
             <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
-            <b>Terraform:</b>
-            IPv4: ${{ steps.parse_terraform_show.outputs.ipv4_addresses }}
-            IPv6: ${{ steps.parse_terraform_show.outputs.ipv6_addresses }}
+            <b>Instances:</b>
+            ${{ steps.parse_terraform_show.outputs.instances }}
 
             <b>Outcome:</b> 
             terraform init: ${{ steps.terraform_init.outcome }}
