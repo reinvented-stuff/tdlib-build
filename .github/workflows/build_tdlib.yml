@@ -212,7 +212,7 @@ jobs:
         run: |
           export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
 
-          ( terraform show -json ; )> "outputs.json"
+          terraform show -json | tee outputs.json
           
           IPv4_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv4-addresses".value[][]' )
           IPv6_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv6-addresses".value[][]' )
