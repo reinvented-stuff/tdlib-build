@@ -224,11 +224,9 @@ jobs:
           ${{ steps.terraform_show.outputs.stdout }}
           EOF
           
-          echo <<EOF >> "${GITHUB_OUTPUT}"
+          cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
-          -
           $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + " " + .ipv4 + "  " + .ipv6' )
-          -
           EOF2
           EOF
 
