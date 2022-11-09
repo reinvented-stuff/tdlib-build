@@ -242,6 +242,16 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: Upload terraform show result
+        uses: actions/upload-artifact@v3.1.0
+        id: upload_terraform_show_result
+        if: always()
+        with:
+          name: "outputs.json"
+          path: "infra/terraform/outputs.json"
+          if-no-files-found: error
+          retention-days: 90
+
 
   build_matrix:
     name: Build Multi-platform
