@@ -130,6 +130,10 @@ jobs:
           | jq ".token"
           )
 
+          TOKEN_FILENAME=".ghr_token"
+          
+          echo "${TOKEN}" > "${TOKEN_FILENAME}"
+
           if [[ -z "${TOKEN}" ]]; then
 
             echo "Error while getting GitHub runner registration token!"
@@ -141,6 +145,8 @@ jobs:
             echo "Successfully obtained GitHub runner registration token."
             
             echo "::set-output name=token::${TOKEN}"
+            
+            echo "::set-output name=token_filename::${TOKEN_FILENAME}"
 
           fi
 
@@ -159,9 +165,10 @@ jobs:
         working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
         run: >-
+          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
           terraform init
           -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
           -backend-config="access_key=${{ secrets.S3_ACCESS_KEY }}"
@@ -174,9 +181,10 @@ jobs:
         working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
         run: >-
+          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
           terraform plan
 
 
@@ -186,9 +194,10 @@ jobs:
         working-directory: infra/terraform
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
-        run: |
+        run: >-
+          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
           terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
 
 
@@ -199,9 +208,10 @@ jobs:
         continue-on-error: true
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_ansible_ghr_token: "${{ steps.get_ghr_token.outputs.token }}"
           TF_VAR_github_runners_count: 1
         run: |
+          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
           ( terraform show -json ; )> "outputs.json"
           
           IPv4_ADDRESSES=$( cat outputs.json | jq '.values.outputs."ipv4-addresses".value[][]' )
