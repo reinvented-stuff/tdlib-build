@@ -192,7 +192,6 @@ jobs:
         id: terraform_apply
         shell: bash
         working-directory: infra/terraform
-        if: 1>1
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
@@ -226,7 +225,7 @@ jobs:
           
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
-          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | "<u>" + .name + "</u>:" + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
+          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
           EOF2
           EOF
 
