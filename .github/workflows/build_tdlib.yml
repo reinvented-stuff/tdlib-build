@@ -50,6 +50,7 @@ jobs:
         with:
           fetch-depth: 0
 
+
       - name: Use latest released action
         id: validate_new_version
         uses: reinvented-stuff/validate-version-action@master
@@ -94,6 +95,7 @@ jobs:
             exit 127
 
           fi
+
 
   prepare_runners:
     name: Spin up GitHub runners
@@ -189,6 +191,7 @@ jobs:
         run: |
           terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
 
+
       - name: Terraform show
         id: terraform_show
         shell: bash
@@ -241,6 +244,7 @@ jobs:
           path: "infra/terraform/terraform_apply.log"
           if-no-files-found: error
           retention-days: 90
+
 
       - name: Upload terraform show result
         uses: actions/upload-artifact@v3.1.0
