@@ -400,25 +400,18 @@ jobs:
       - name: Send notification on finish
         uses: rest-gateway/notification-action@master
         with:
-          message: >-
+          message: |
             <b>Workflow:</b>   ${GITHUB_WORKFLOW}
-
             <b>Repository:</b> ${GITHUB_REPOSITORY}
 
             <b>Matrix:</b>
-
             Version: ${{ matrix.version }}
-            
             Ref: ${{ env.PLANNED_VERSION_COMMIT }}
-
             Label: ${{ matrix.runs-on.label }}
-
             Arch: ${{ matrix.runs-on.arch }}
 
             <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
-
             <b>Artifact:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}
-
             <b>Artifact repo:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
