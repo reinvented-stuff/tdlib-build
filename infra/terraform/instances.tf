@@ -98,16 +98,25 @@ resource "vultr_instance" "ghr-redhat-7" {
 
 }
 
-output "ipv4-addresses" {
-    value = [
-        vultr_instance.ghr-redhat-8[*].main_ip,
-        vultr_instance.ghr-redhat-7[*].main_ip,
-    ]
-}
+output instance-details {
 
-output "ipv6-addresses" {
     value = [
-        vultr_instance.ghr-redhat-8[*].v6_main_ip,
-        vultr_instance.ghr-redhat-7[*].v6_main_ip,
+        flatten([
+            for item in vultr_instance.ghr-redhat-8[*] : {
+                type = "ghr-redhat-8"
+                name = item.label
+                ipv4 = item.main_ip
+                ipv6 = item.v6_main_ip
+            }
+        ]),
+
+        flatten([
+            for item in vultr_instance.ghr-redhat-7[*] : {
+                type = "ghr-redhat-7"
+                name = item.label
+                ipv4 = item.main_ip
+                ipv6 = item.v6_main_ip
+            }
+        ])
     ]
 }
