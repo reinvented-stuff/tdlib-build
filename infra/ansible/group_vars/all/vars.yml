@@ -3,10 +3,6 @@ swap_file_enabled: yes
 swap_file_path: /swap
 swap_file_size_mb: 2048
 
-nameservers:
-  - 8.8.8.8
-  - 8.8.4.4
-
 permit_root_login: false
 
 users:

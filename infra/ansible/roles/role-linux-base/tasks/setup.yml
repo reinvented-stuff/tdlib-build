@@ -6,5 +6,7 @@
     dest: "/etc/resolv.conf"
     mode: 0644
     backup: yes
+  when:
+    - nameservers | length > 0
 
 ...
