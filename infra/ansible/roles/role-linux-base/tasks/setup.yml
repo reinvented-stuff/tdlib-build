@@ -1,5 +1,13 @@
 ---
 
+- name: Ensure resolv.conf is not immutable
+  file:
+    path: /etc/resolv.conf
+    attr: -i
+  when:
+    - nameservers | length > 0
+
+
 - name: Render /etc/resolv.conf
   template:
     src: resolv.conf.j2
