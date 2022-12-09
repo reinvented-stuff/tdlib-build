@@ -13,8 +13,7 @@ yum_repo_packages_host: []
 systemd_services_host: []
 systemd_services_group: []
 
-nameservers:
-  - 8.8.8.8
+nameservers: []
 
 swap_file_enabled: no
 swap_file_path: /swap
