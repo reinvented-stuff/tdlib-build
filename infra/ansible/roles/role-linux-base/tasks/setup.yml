@@ -1,19 +1,21 @@
 ---
 
-- name: Ensure resolv.conf is not immutable
-  file:
-    path: /etc/resolv.conf
-    attr: -i
-  when:
-    - nameservers | length > 0
+- name: Process nameservers
+  block:
+
+    - name: Ensure resolv.conf is not immutable
+      file:
+        path: /etc/resolv.conf
+        attr: -i
 
 
-- name: Render /etc/resolv.conf
-  template:
-    src: resolv.conf.j2
-    dest: "/etc/resolv.conf"
-    mode: 0644
-    backup: yes
+    - name: Render /etc/resolv.conf
+      template:
+        src: resolv.conf.j2
+        dest: "/etc/resolv.conf"
+        mode: 0644
+        backup: yes
+
   when:
     - nameservers | length > 0
 
