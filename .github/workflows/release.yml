@@ -18,7 +18,7 @@ jobs:
     steps:
 
       - name: Send notification on start
-        uses: rest-gateway/notification-action@master
+        uses: rest-gateway/notification-action@1.0.9
         with:
           message: |
             Repository: ${GITHUB_REPOSITORY}
@@ -203,7 +203,7 @@ jobs:
 
 
       - name: Notify about release
-        uses: rest-gateway/notification-action@master
+        uses: rest-gateway/notification-action@1.0.9
         with:
           message: >-
             <b>Release ${{env.APP_NAME}} ${{env.PLANNED_RELEASE_NAME}}:</b>
