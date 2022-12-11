@@ -147,6 +147,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_SCANNER_OPTS: >-
+            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.organization=${{ github.event.organization.name }}
 
 
       - name: Send notification on build completion
