@@ -149,7 +149,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_SCANNER_OPTS: >-
             -Dsonar.projectKey=${{ github.event.repository.name }}
-            -Dsonar.organization=${GITHUB_REPOSITORY_OWNER}
+            -Dsonar.organization=${{ env.GITHUB_REPOSITORY_OWNER }}
 
 
       - name: Send notification on build completion
