@@ -150,6 +150,8 @@ jobs:
           SONAR_SCANNER_OPTS: >-
             -Dsonar.projectKey=${{ github.event.repository.name }}
             -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.sources=.
+            -Dsonar.verbose=true
 
 
       - name: Send notification on build completion
