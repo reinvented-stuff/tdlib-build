@@ -36,11 +36,14 @@ Base Linux configuration.
 # Examples
 
 ```yaml
+---
+
 - name: Initial configuration
   hosts: all
   gather_facts: yes
 
   roles:
     - role: role-linux-base
+...
 
 ```
