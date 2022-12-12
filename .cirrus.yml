@@ -37,7 +37,7 @@ prepare_and_build_task:
     - source ~/.zshrc
     - mkdir -v "dist"
     - mv -v td/tdlib "dist/"
-    - tar -zvcf tdlib_macos-13.tar.gz "dist"
+    - tar -zvcf "${ARTIFACT_TARGZ_NAME}" "dist"
 
   upload_artifacts_script:
     - source ~/.zshrc
