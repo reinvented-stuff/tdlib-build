@@ -1,3 +1,5 @@
+---
+
 macos_instance:
   image: ghcr.io/cirruslabs/macos-ventura-base:latest
 
@@ -32,9 +34,25 @@ prepare_and_build_task:
 
   upload_artifacts_script: >-
     curl
-    -o result.json
+    -o upload_to_artifactory_result.json
     -X PUT
     -H "Authorization: Bearer ${ARTIFACTORY_RW_PASSWORD}"
     -T "${ARTIFACT_TARGZ_NAME}"
     "${ARTIFACTORY_REPO_URL}/${ARTIFACT_TARGZ_NAME}"
 
+
+  list_artifacts_script: >-
+    curl
+    -o list_artifacts_result.json
+    -X GET
+    -H "Authorization: Bearer ${ARTIFACTORY_RW_PASSWORD}"
+    -H "Content-Type: text/plain"
+    "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
+
+
+  results_printout_script:
+    - jq < upload_to_artifactory_result.json
+    - jq < list_artifacts_result.json
+    - jq -r '.results[].uri' < list_artifacts_result.json
+
+...
