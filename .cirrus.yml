@@ -6,7 +6,7 @@ macos_instance:
 prepare_and_build_task:
   name: Prepare environment and build
   environment:
-    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!25438ba639edbeda871971236d8a914ea0a7d224bff478e2f47cab8d488044471f03750d716026e64ce81d62e49ca99b!]
+    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88!]
     ARTIFACTORY_REPO_URL: ENCRYPTED[!598b9d3d4129b601da6dc3e35cb0652f7990dabd7aa70188af703723af84395fc4dfec9789adffe81aeab649bfed5f75!]
     ARTIFACT_TARGZ_NAME: ""
     APP_NAME: tdlib
