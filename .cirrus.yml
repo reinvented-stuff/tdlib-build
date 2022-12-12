@@ -18,6 +18,15 @@ prepare_and_build_task:
     - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
     - echo "$( echo "${ARTIFACTORY_RW_TOKEN}" | wc -c )"
 
+  tmp_script: >-
+    curl
+    -o list_artifacts_result.json
+    -X GET
+    -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+    -H "Content-Type: text/plain"
+    "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
+
+
   install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
 
   checkout_td_script: 
