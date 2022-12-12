@@ -3,6 +3,17 @@ macos_instance:
 
 prepare_and_build_task:
   name: Prepare environment and build
+  environment:
+    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!25438ba639edbeda871971236d8a914ea0a7d224bff478e2f47cab8d488044471f03750d716026e64ce81d62e49ca99b!]
+    ARTIFACTORY_REPO_URL: ENCRYPTED[!598b9d3d4129b601da6dc3e35cb0652f7990dabd7aa70188af703723af84395fc4dfec9789adffe81aeab649bfed5f75!]
+    ARTIFACT_TARGZ_NAME: ""
+    APP_NAME: tdlib
+    ARCH: arm64
+    OS: macos13
+
+  fetch_version_script:
+    - export PLANNED_VERSION=$( cat .version )
+    - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
 
   install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
 
@@ -18,4 +29,12 @@ prepare_and_build_task:
     - mkdir -v "dist"
     - mv -v td/tdlib "dist/"
     - tar -zvcf tdlib_macos-13.tar.gz "dist"
+
+  upload_artifacts_script: >-
+    curl
+    -o result.json
+    -X PUT
+    -H "Authorization: Bearer ${ARTIFACTORY_RW_PASSWORD}"
+    -T "${ARTIFACT_TARGZ_NAME}"
+    "${ARTIFACTORY_REPO_URL}/${ARTIFACT_TARGZ_NAME}"
 
