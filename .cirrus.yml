@@ -20,7 +20,7 @@ prepare_and_build_task:
 
   tmp_script: >-
     curl
-    -o list_artifacts_result.json
+    -o -
     -X GET
     -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
     -H "Content-Type: text/plain"
