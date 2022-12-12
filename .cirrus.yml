@@ -14,17 +14,28 @@ prepare_and_build_task:
     OS: macos13
 
   fetch_version_script:
-    - export PLANNED_VERSION=$( cat .version )
-    - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
-    - echo "$( echo "${ARTIFACTORY_RW_TOKEN}" | wc -c )"
+    - echo "export PLANNED_VERSION=$( cat .version )" >> ~/.zshrc
+    - echo "export ARTIFACT_TARGZ_NAME='${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz'" >> ~/.zshrc
 
-  tmp_script: >-
-    curl
-    -o -
-    -X GET
-    -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
-    -H "Content-Type: text/plain"
-    "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
+  tmp_script:
+    - >-
+      curl
+      -o -
+      -X GET
+      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+      -H "Content-Type: text/plain"
+      "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
+
+  tmp2_script:
+    - >-
+      source ~/.zshrc
+    - >-
+      curl
+      -o -
+      -X GET
+      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+      -H "Content-Type: text/plain"
+      "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
 
 
   install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
