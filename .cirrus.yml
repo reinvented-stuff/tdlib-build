@@ -1,21 +1,70 @@
+---
+
 macos_instance:
   image: ghcr.io/cirruslabs/macos-ventura-base:latest
 
 prepare_and_build_task:
   name: Prepare environment and build
+  only_if: $CIRRUS_BRANCH =~ 'build_.*'
+  environment:
+    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88!]
+    ARTIFACTORY_REPO_URL: https://pavelkim.jfrog.io/artifactory
+    ARTIFACT_TARGZ_NAME: ""
+    APP_NAME: tdlib
+    ARCH: arm64
+    OS: macos13
 
-  install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
+  fetch_version_script:
+    - export PLANNED_VERSION=$( cat .version )
+    - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
+    - echo "export PLANNED_VERSION='${PLANNED_VERSION}'" >> ~/.zshrc
+    - echo "export ARTIFACT_TARGZ_NAME='${ARTIFACT_TARGZ_NAME}'" >> ~/.zshrc
+
+  install_dependencies_script:
+    - source ~/.zshrc
+    - bash sbin/macos-13/install-dependencies.sh
 
   checkout_td_script: 
+    - source ~/.zshrc
     - mkdir -pv td
     - git clone https://github.com/tdlib/td.git td
     - ls -lAth .
 
   build_td_script:
+    - source ~/.zshrc
     - bash "sbin/macos-13/build.sh"
 
   prepare_artifacts_script:
+    - source ~/.zshrc
     - mkdir -v "dist"
     - mv -v td/tdlib "dist/"
-    - tar -zvcf tdlib_macos-13.tar.gz "dist"
+    - tar -zvcf "${ARTIFACT_TARGZ_NAME}" "dist"
 
+  upload_artifacts_script:
+    - source ~/.zshrc
+    - >-
+      curl
+      -o upload_to_artifactory_result.json
+      -X PUT
+      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+      -T "${ARTIFACT_TARGZ_NAME}"
+      "${ARTIFACTORY_REPO_URL}/${APP_NAME}/${ARTIFACT_TARGZ_NAME}"
+
+
+  list_artifacts_script:
+    - source ~/.zshrc
+    - >-
+      curl
+      -o list_artifacts_result.json
+      -X GET
+      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+      -H "Content-Type: text/plain"
+      "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
+
+
+  results_printout_script:
+    - jq < upload_to_artifactory_result.json
+    - jq < list_artifacts_result.json
+    - jq -r '.results[].uri' < list_artifacts_result.json
+
+...
