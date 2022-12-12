@@ -5,6 +5,9 @@
 
 set -e
 
+echo "Import .zshrc"
+source ~/.zshrc
+
 echo "Start building"
 
 cd td
@@ -13,7 +16,7 @@ rm -rf build
 mkdir build
 
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/ -DCMAKE_INSTALL_PREFIX:PATH=../tdlib ..
+cmake -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR="${OPENSSL_ROOT_DIR}" -DCMAKE_INSTALL_PREFIX:PATH=../tdlib ..
 cmake --build . --target install -- -j4
 
 cd ..
