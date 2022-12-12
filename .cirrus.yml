@@ -16,7 +16,7 @@ prepare_and_build_task:
   fetch_version_script:
     - export PLANNED_VERSION=$( cat .version )
     - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
-    - echo "$( echo "${ARTIFACTORY_RW_TOKEN}" | wc -l )"
+    - echo "$( echo "${ARTIFACTORY_RW_TOKEN}" | wc -c )"
 
   install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
 
