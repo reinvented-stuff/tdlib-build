@@ -8,7 +8,7 @@ prepare_and_build_task:
   only_if: $CIRRUS_BRANCH =~ 'build_.*'
   environment:
     ARTIFACTORY_RW_TOKEN: ENCRYPTED[!0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88!]
-    ARTIFACTORY_REPO_URL: https://pavelkim.jfrog.io/artifactory
+    ARTIFACTORY_REPO_URL: ENCRYPTED[!2570f878f406c2bf1264238eeda0507248b1ec7a29f9a950ce5c0dd56fd7f57e4e05c78360bdfca334cc0026ac7c805b!]
     ARTIFACT_TARGZ_NAME: ""
     APP_NAME: tdlib
     ARCH: arm64
