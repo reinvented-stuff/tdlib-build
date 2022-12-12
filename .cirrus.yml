@@ -36,7 +36,7 @@ prepare_and_build_task:
     curl
     -o upload_to_artifactory_result.json
     -X PUT
-    -H "Authorization: Bearer ${ARTIFACTORY_RW_PASSWORD}"
+    -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
     -T "${ARTIFACT_TARGZ_NAME}"
     "${ARTIFACTORY_REPO_URL}/${ARTIFACT_TARGZ_NAME}"
 
@@ -45,7 +45,7 @@ prepare_and_build_task:
     curl
     -o list_artifacts_result.json
     -X GET
-    -H "Authorization: Bearer ${ARTIFACTORY_RW_PASSWORD}"
+    -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
     -H "Content-Type: text/plain"
     "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
 
