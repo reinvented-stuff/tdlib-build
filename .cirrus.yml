@@ -1,0 +1,21 @@
+macos_instance:
+  image: ghcr.io/cirruslabs/macos-ventura-base:latest
+
+prepare_and_build_task:
+  name: Prepare environment and build
+
+  install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
+
+  checkout_td_script: 
+    - mkdir -pv td
+    - git clone https://github.com/tdlib/td.git td
+    - ls -lAth .
+
+  build_td_script:
+    - bash "sbin/macos-13/build.sh"
+
+  prepare_artifacts_script:
+    - mkdir -v "dist"
+    - mv -v td/tdlib "dist/"
+    - tar -zvcf tdlib_macos-13.tar.gz "dist"
+
