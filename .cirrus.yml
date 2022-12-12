@@ -5,6 +5,7 @@ macos_instance:
 
 prepare_and_build_task:
   name: Prepare environment and build
+  only_if: $CIRRUS_BRANCH =~ 'build_.*'
   environment:
     ARTIFACTORY_RW_TOKEN: ENCRYPTED[!0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88!]
     ARTIFACTORY_REPO_URL: https://pavelkim.jfrog.io/artifactory
