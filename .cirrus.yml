@@ -6,7 +6,7 @@ macos_instance:
 prepare_and_build_task:
   name: Prepare environment and build
   environment:
-    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!7191c70520f2a8e33bf3ce9e0a304da32faf18436e060264c992f769ca6cac6d68b0c2f4bc435d5eb25a2bde5391f08d!]
+    ARTIFACTORY_RW_TOKEN: ENCRYPTED[0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88]
     ARTIFACTORY_REPO_URL: https://pavelkim.jfrog.io/artifactory
     ARTIFACT_TARGZ_NAME: ""
     APP_NAME: tdlib
@@ -16,6 +16,7 @@ prepare_and_build_task:
   fetch_version_script:
     - export PLANNED_VERSION=$( cat .version )
     - export ARTIFACT_TARGZ_NAME="${APP_NAME}-${PLANNED_VERSION}-${OS}-${ARCH}.tar.gz"
+    - export ARTIFACT_TARGZ_NAME=".version"
 
   install_dependencies_script: bash sbin/macos-13/install-dependencies.sh
 
@@ -25,6 +26,7 @@ prepare_and_build_task:
     - ls -lAth .
 
   build_td_script:
+    - exit 0
     - bash "sbin/macos-13/build.sh"
 
   prepare_artifacts_script:
