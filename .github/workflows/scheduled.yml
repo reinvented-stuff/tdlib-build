@@ -99,7 +99,7 @@ jobs:
           terraform show -json |
           jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
           "outputs.json"
-          
+
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
           $( cat outputs.json  )
@@ -119,7 +119,7 @@ jobs:
             <b>Instances:</b>
             ${{ steps.terraform_show.outputs.instances }}
 
-            <b>Outcome:</b> 
+            <b>Outcome:</b>
             terraform init: ${{ steps.terraform_init.outcome }}
             terraform plan: ${{ steps.terraform_plan.outcome }}
             terraform apply: ${{ steps.terraform_apply.outcome }}
