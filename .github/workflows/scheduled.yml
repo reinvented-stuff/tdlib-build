@@ -56,7 +56,7 @@ jobs:
           head -1
           )
 
-          echo "::set-output name=last_version::${LAST_VERSION}"
+          echo "last_version=${LAST_VERSION}" >> "${GITHUB_OUTPUT}"
 
 
       - name: Match last tdlib version with .version contents
@@ -66,11 +66,11 @@ jobs:
           PLANNED_VERSION="$( cat .version )"
 
           if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
-            echo "::set-output name=match::true"
-            echo "::set-output name=caption::No new version found"
+            echo "match=true" >> "${GITHUB_OUTPUT}"
+            echo "caption=No new version found" >> "${GITHUB_OUTPUT}"
           else
-            echo "::set-output name=match::false"
-            echo "::set-output name=caption::Scheduled run found new version: ${{ steps.get_last_version.outputs.last_version }}"
+            echo "match=false" >> "${GITHUB_OUTPUT}"
+            echo "caption=Scheduled run found new version: ${{ steps.get_last_version.outputs.last_version }}" >> "${GITHUB_OUTPUT}"
           fi
 
 

@@ -79,7 +79,7 @@ jobs:
           --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}"
           )
 
-          echo "::set-output name=version_commit::${VERSION_COMMIT}"
+          echo "version_commit=${VERSION_COMMIT}" >> "${GITHUB_OUTPUT}"
 
 
       - name: Make sure commit exists for the planned version
@@ -144,9 +144,9 @@ jobs:
 
             echo "Successfully obtained GitHub runner registration token."
 
-            echo "::set-output name=token::${TOKEN}"
+            echo "token=${TOKEN}" >> "${GITHUB_OUTPUT}"
 
-            echo "::set-output name=token_filename::${TOKEN_FILENAME}"
+            echo "token_filename=${TOKEN_FILENAME}" >> "${GITHUB_OUTPUT}"
 
           fi
 
