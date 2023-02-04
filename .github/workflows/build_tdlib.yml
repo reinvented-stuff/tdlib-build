@@ -53,7 +53,7 @@ jobs:
 
       - name: Use latest released action
         id: validate_new_version
-        uses: reinvented-stuff/validate-version-action@master
+        uses: reinvented-stuff/validate-version-action@1.2.0
         with:
           version_filename: ".version"
           github_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -87,11 +87,11 @@ jobs:
         shell: bash
         run: >-
           if [[ -z "${{ steps.get_version_commit.outputs.version_commit }}" ]]; then
-            
+
             echo "Couldn't find commit
           for planned version '${{ steps.validate_new_version.outputs.planned_version }}':
           '${{ steps.get_version_commit.outputs.version_commit }}'"
-            
+
             exit 127
 
           fi
@@ -131,7 +131,7 @@ jobs:
           )
 
           TOKEN_FILENAME="${PWD}/.ghr_token"
-          
+
           echo "${TOKEN}" > "${TOKEN_FILENAME}"
 
           if [[ -z "${TOKEN}" ]]; then
@@ -143,9 +143,9 @@ jobs:
           else
 
             echo "Successfully obtained GitHub runner registration token."
-            
+
             echo "::set-output name=token::${TOKEN}"
-            
+
             echo "::set-output name=token_filename::${TOKEN_FILENAME}"
 
           fi
@@ -222,7 +222,7 @@ jobs:
           cat <<EOF > outputs.json
           ${{ steps.terraform_show.outputs.stdout }}
           EOF
-          
+
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
           $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
@@ -242,7 +242,7 @@ jobs:
             <b>Instances:</b>
             ${{ steps.parse_terraform_show.outputs.instances }}
 
-            <b>Outcome:</b> 
+            <b>Outcome:</b>
             terraform init: ${{ steps.terraform_init.outcome }}
             terraform plan: ${{ steps.terraform_plan.outcome }}
             terraform apply: ${{ steps.terraform_apply.outcome }}
@@ -283,7 +283,7 @@ jobs:
 
     strategy:
       matrix:
-        version: 
+        version:
           - ${{ needs.validate_new_version.outputs.planned_version }}
         runs-on:
 
@@ -420,7 +420,7 @@ jobs:
             Label: ${{ matrix.runs-on.label }}
             Arch: ${{ matrix.runs-on.arch }}
 
-            <b>Outcome:</b> 
+            <b>Outcome:</b>
             install_dependencies: ${{ steps.install_dependencies.outcome }}
             checkout_tdlib_repo: ${{ steps.checkout_tdlib_repo.outcome }}
             print_directory_contents: ${{ steps.print_directory_contents.outcome }}
