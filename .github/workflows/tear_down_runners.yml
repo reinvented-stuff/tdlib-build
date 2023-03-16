@@ -61,8 +61,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 0
         run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
           terraform init
           -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
           -backend-config="access_key=${{ secrets.S3_ACCESS_KEY }}"
@@ -77,8 +75,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 0
         run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
           terraform plan
 
 
@@ -90,8 +86,6 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 0
         run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
           terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
 
 

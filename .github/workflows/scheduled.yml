@@ -120,9 +120,7 @@ jobs:
             ${{ steps.terraform_show.outputs.instances }}
 
             <b>Outcome:</b>
-            terraform init: ${{ steps.terraform_init.outcome }}
-            terraform plan: ${{ steps.terraform_plan.outcome }}
-            terraform apply: ${{ steps.terraform_apply.outcome }}
+            terraform show: ${{ steps.terraform_show.outcome }}
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
