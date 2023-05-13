@@ -36,15 +36,19 @@ log "Installing Docker"
 log "Lifting quarantine from Docker application"
 xattr -d -r com.apple.quarantine /Applications/Docker.app
 
-log "Manually implementing Docker initial setup"
-sudo cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
-sudo cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
-sudo chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
-sudo chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
-sudo launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
-
 log "Starting Docker desktop"
 open -a Docker
+
+log "Looking for com.docker.vmnetd"
+sudo find / -type f -name com.docker.vmnetd 2>/dev/null
+
+log "Manually implementing Docker initial setup"
+sudo cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
+# sudo cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
+sudo chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
+# sudo chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
+# sudo launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
+
 
 log "Workaroundig probably missing PATH section"
 export PATH="/usr/local/bin:${PATH}"
