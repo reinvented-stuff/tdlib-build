@@ -495,7 +495,7 @@ jobs:
         run: |
           DEPENDENCIES_INSTALL_SCRIPT="sbin/${{ matrix.runs-on.os }}/install-dependencies-docker.sh"
 
-          if [[ -e "${DEPENDENCIES_INSTALL_SCRIPT}" ]]
+          if [[ -e "${DEPENDENCIES_INSTALL_SCRIPT}" ]]; then
             bash "${DEPENDENCIES_INSTALL_SCRIPT}"
           else
             echo "No dependencies install script found: '${DEPENDENCIES_INSTALL_SCRIPT}'"
