@@ -59,7 +59,7 @@ else
 fi
 
 log "Waiting for docker ps to work"
-MAX_ATTEMPTS=40
+MAX_ATTEMPTS=39
 CURRENT_ATTEMPT=0
 DELAY_SEC=2
 DOCKER_CHECK_RC=1
