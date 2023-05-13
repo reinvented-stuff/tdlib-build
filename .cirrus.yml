@@ -98,7 +98,7 @@ prepare_and_build_docker_task:
 
     - >
       docker build
-      --tag "docker.io/reinvented_stuff/tdlib"
+      --tag "docker.io/reinvented_stuff/tdlib:${PLANNED_VERSION}-${DOCKER_OS}"
       --build-arg BUILD_VERSION="${PLANNED_VERSION}-${DOCKER_OS}"
       --file Dockerfile
       .
