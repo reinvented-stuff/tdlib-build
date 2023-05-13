@@ -37,11 +37,11 @@ log "Lifting quarantine from Docker application"
 xattr -d -r com.apple.quarantine /Applications/Docker.app
 
 log "Manually implementing Docker initial setup"
-cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
-cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
-chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
-chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
-launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
+sudo cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
+sudo cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
+sudo chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
+sudo chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
+sudo launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
 
 log "Starting Docker desktop"
 open -a Docker
