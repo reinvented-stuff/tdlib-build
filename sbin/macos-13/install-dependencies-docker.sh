@@ -17,7 +17,7 @@ echo "Downloading Docker package"
 curl -o /tmp/Docker.dmg -Ls https://desktop.docker.com/mac/main/arm64/Docker.dmg
 
 echo "Installing Docker"
-hdiutil attach Docker.dmg
+hdiutil attach /tmp/Docker.dmg
 /Volumes/Docker/Docker.app/Contents/MacOS/install
 hdiutil detach /Volumes/Docker
 
