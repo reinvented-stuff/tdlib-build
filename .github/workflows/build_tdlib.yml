@@ -105,8 +105,6 @@ jobs:
     needs:
       - validate_new_version
 
-    if: 1 == 2
-
     steps:
 
       - name: Check out this repository
@@ -313,8 +311,6 @@ jobs:
 
     runs-on: ${{ matrix.runs-on.os }}
 
-    if: 1 == 2
-
     needs:
       - validate_new_version
       - prepare_runners
@@ -453,17 +449,15 @@ jobs:
       job_status: ${{ job.status }}
 
     strategy:
+
       matrix:
+
         version:
           - ${{ needs.validate_new_version.outputs.planned_version }}
+
         runs-on:
 
-          # - os: redhat-8
-          #   label: linux-redhat-8
-          #   arch: amd64
-          #   docker: alpine-3.18
-
-          - os: ubuntu-22.04
+          - os: redhat-8
             label: alpine-3.18
             arch: amd64
             docker: alpine-3.18
@@ -472,14 +466,12 @@ jobs:
 
     needs:
       - validate_new_version
-      # - prepare_runners
+      - prepare_runners
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
       APP_NAME: "tdlib"
-      ARTIFACT_BASENAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
-      ARTIFACT_TARGZ_NAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
 
     steps:
 
@@ -509,24 +501,8 @@ jobs:
           registry_address: "ghcr.io"
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
-          name: "${{ github.repository }}/${{ env.APP_NAME }}"
-          planned_version: "${{ env.PLANNED_VERSION }}"
-          skip_branch_name: true
-          working_directory: "docker/${{ matrix.runs-on.docker }}"
-          build_args: |-
-            APP_VERSION=${{ env.PLANNED_VERSION }}
-
-
-      - name: Build Docker image (docker hub)
-        id: build_docker_image_hub
-        uses: reinvented-stuff/build-docker-image-action@2.2.0
-        if: 1 == 2
-        with:
-          registry_address: "docker.io"
-          registry_username: "${{ secrets.DOCKER_HUB_USERNAME }}"
-          registry_token: "${{ secrets.DOCKER_HUB_TOKEN }}"
-          name: "${{ secrets.DOCKER_HUB_IMAGE_NAME }}"
-          planned_version: "${{ env.PLANNED_VERSION }}"
+          name: "${{ env.APP_NAME }}"
+          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}"
           skip_branch_name: true
           working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
@@ -539,7 +515,6 @@ jobs:
           message: |
             Docker image: <b>${{ env.APP_NAME }}</b> v${{ env.PLANNED_VERSION }} (${{ env.BRANCH_NAME }})
 
-            <code>${{ steps.build_docker_image_hub.outputs.image_full_name }}</code>
             <code>${{ steps.build_docker_image_ghcr.outputs.image_full_name }}</code>
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
@@ -560,20 +535,13 @@ jobs:
             Ref: ${{ env.PLANNED_VERSION_COMMIT }}
             Label: ${{ matrix.runs-on.label }}
             Arch: ${{ matrix.runs-on.arch }}
+            Docker: ${{ matrix.runs-on.docker }}
 
             <b>Outcome:</b>
             install_dependencies: ${{ steps.install_dependencies.outcome }}
-            checkout_tdlib_repo: ${{ steps.checkout_tdlib_repo.outcome }}
-            print_directory_contents: ${{ steps.print_directory_contents.outcome }}
-            build: ${{ steps.build.outcome }}
-            compress_binaries: ${{ steps.compress_binaries.outcome }}
-            upload_build_artifact: ${{ steps.upload_build_artifact.outcome }}
-            upload_to_artifactory: ${{ steps.upload_to_artifactory.outcome }}
-            list_artifacts: ${{ steps.list_artifacts.outcome }}
+            build_docker_image_ghcr: ${{ steps.build_docker_image_ghcr.outcome }}
 
             <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
-            <b>Artifact:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}
-            <b>Artifact repo:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
