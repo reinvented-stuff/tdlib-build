@@ -497,22 +497,21 @@ jobs:
 
       - name: Build Docker image (ghcr)
         id: build_docker_image_ghcr
-        uses: reinvented-stuff/build-docker-image-action@2.0.0
-        working-directory: docker/${{ matrix.runs-on.docker }}
+        uses: reinvented-stuff/build-docker-image-action@2.1.0
         with:
           registry_address: "ghcr.io"
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
           name: "${{ github.repository }}/${{ env.APP_NAME }}"
           planned_version: "${{ env.PLANNED_VERSION }}"
+          working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
             APP_VERSION=${{ env.PLANNED_VERSION }}
 
 
       - name: Build Docker image (docker hub)
         id: build_docker_image_hub
-        uses: reinvented-stuff/build-docker-image-action@2.0.0
-        working-directory: docker/${{ matrix.runs-on.docker }}
+        uses: reinvented-stuff/build-docker-image-action@2.1.0
         if: 1 == 2
         with:
           registry_address: "docker.io"
@@ -520,6 +519,7 @@ jobs:
           registry_token: "${{ secrets.DOCKER_HUB_TOKEN }}"
           name: "${{ secrets.DOCKER_HUB_IMAGE_NAME }}"
           planned_version: "${{ env.PLANNED_VERSION }}"
+          working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
             APP_VERSION=${{ env.PLANNED_VERSION }}
 
