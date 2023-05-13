@@ -17,14 +17,31 @@ else
 	log "xcode is probably already there. not taking any more effort to verify what has happened"
 fi
 
-log "Downloading Docker package"
-curl -o /tmp/Docker.dmg -Ls https://desktop.docker.com/mac/main/arm64/Docker.dmg
 
-log "Attaching Docker.dmg"
-hdiutil attach /tmp/Docker.dmg
+log "Installing brew"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-log "Installing Docker"
-/Volumes/Docker/Docker.app/Contents/MacOS/install
+log "Installing brew packages"
+brew install docker docker-compose
+
+# log "Downloading Docker package"
+# curl -o /tmp/Docker.dmg -Ls https://desktop.docker.com/mac/main/arm64/Docker.dmg
+
+# log "Attaching Docker.dmg"
+# hdiutil attach /tmp/Docker.dmg
+
+# log "Installing Docker"
+# /Volumes/Docker/Docker.app/Contents/MacOS/install
+
+log "Lifting quarantine from Docker application"
+xattr -d -r com.apple.quarantine /Applications/Docker.app
+
+log "Manually implementing Docker initial setup"
+cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
+cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
+chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
+chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
+launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
 
 log "Starting Docker desktop"
 open -a Docker
