@@ -24,14 +24,14 @@ log "Installing brew"
 log "Installing brew packages"
 brew install docker docker-compose
 
-# log "Downloading Docker package"
-# curl -o /tmp/Docker.dmg -Ls https://desktop.docker.com/mac/main/arm64/Docker.dmg
+log "Downloading Docker package"
+curl -o /tmp/Docker.dmg -Ls https://desktop.docker.com/mac/main/arm64/Docker.dmg
 
-# log "Attaching Docker.dmg"
-# hdiutil attach /tmp/Docker.dmg
+log "Attaching Docker.dmg"
+hdiutil attach /tmp/Docker.dmg
 
-# log "Installing Docker"
-# /Volumes/Docker/Docker.app/Contents/MacOS/install
+log "Installing Docker"
+/Volumes/Docker/Docker.app/Contents/MacOS/install
 
 log "Lifting quarantine from Docker application"
 xattr -d -r com.apple.quarantine /Applications/Docker.app
