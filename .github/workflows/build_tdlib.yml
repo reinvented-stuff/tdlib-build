@@ -459,7 +459,7 @@ jobs:
           - os: redhat-8
             label: linux-redhat-8
             arch: amd64
-            docker: alpine-3-18
+            docker: alpine-3.18
 
     runs-on: ${{ matrix.runs-on.os }}
 
