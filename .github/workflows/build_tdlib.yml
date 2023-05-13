@@ -2,6 +2,8 @@
 # yamllint disable rule:line-length
 # yamllint disable rule:truthy
 
+# TODO: Get rid of relative paths
+
 name: Build TDLib
 
 on:
@@ -303,10 +305,6 @@ jobs:
             label: macos12
             arch: amd64
 
-          - os: macos-10.15
-            label: macos10.15
-            arch: amd64
-
     runs-on: ${{ matrix.runs-on.os }}
 
     needs:
@@ -433,6 +431,113 @@ jobs:
             <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
             <b>Artifact:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}/${{ env.ARTIFACT_TARGZ_NAME }}
             <b>Artifact repo:</b> ${{ secrets.ARTIFACTORY_REPO_URL }}
+
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+  build_matrix_docker:
+    name: Build Multi-platform Docker
+
+    outputs:
+      job_status: ${{ job.status }}
+
+    strategy:
+
+      matrix:
+
+        version:
+          - ${{ needs.validate_new_version.outputs.planned_version }}
+
+        runs-on:
+
+          - os: redhat-8
+            label: alpine-3.18
+            arch: amd64
+            docker: alpine-3.18
+
+    runs-on: ${{ matrix.runs-on.os }}
+
+    needs:
+      - validate_new_version
+      - prepare_runners
+
+    env:
+      PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
+      APP_NAME: "tdlib"
+
+    steps:
+
+      - name: Check out this repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+      - name: Install dependencies
+        id: install_dependencies
+        shell: bash
+        run: |
+          DEPENDENCIES_INSTALL_SCRIPT="sbin/${{ matrix.runs-on.os }}/install-dependencies-docker.sh"
+
+          if [[ -e "${DEPENDENCIES_INSTALL_SCRIPT}" ]]; then
+            bash "${DEPENDENCIES_INSTALL_SCRIPT}"
+          else
+            echo "No dependencies install script found: '${DEPENDENCIES_INSTALL_SCRIPT}'"
+          fi
+
+
+      - name: Build Docker image (ghcr)
+        id: build_docker_image_ghcr
+        uses: reinvented-stuff/build-docker-image-action@2.2.0
+        with:
+          registry_address: "ghcr.io"
+          registry_username: "${{ github.actor }}"
+          registry_token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ github.repository_owner }}/${{ env.APP_NAME }}"
+          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}"
+          skip_branch_suffix: true
+          working_directory: "docker/${{ matrix.runs-on.docker }}"
+          build_args: |-
+            APP_VERSION=${{ env.PLANNED_VERSION }}
+
+
+      - name: Send out notification about docker image build
+        uses: rest-gateway/notification-action@1.0.9
+        with:
+          message: |
+            Docker image: <b>${{ env.APP_NAME }}</b> v${{ env.PLANNED_VERSION }} (${{ env.BRANCH_NAME }})
+
+            <code>${{ steps.build_docker_image_ghcr.outputs.image_full_name }}</code>
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+      - name: Send notification on build completion
+        uses: rest-gateway/notification-action@1.0.9
+        if: always()
+        with:
+          message: |
+            <b>Workflow:</b>   ${GITHUB_WORKFLOW}
+            <b>Repository:</b> ${GITHUB_REPOSITORY}
+
+            <b>Matrix:</b>
+            Version: ${{ matrix.version }}
+            Ref: ${{ env.PLANNED_VERSION_COMMIT }}
+            Label: ${{ matrix.runs-on.label }}
+            Arch: ${{ matrix.runs-on.arch }}
+            Docker: ${{ matrix.runs-on.docker }}
+
+            <b>Outcome:</b>
+            install_dependencies: ${{ steps.install_dependencies.outcome }}
+            build_docker_image_ghcr: ${{ steps.build_docker_image_ghcr.outcome }}
+
+            <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
 
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"

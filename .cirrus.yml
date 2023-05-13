@@ -67,4 +67,41 @@ prepare_and_build_task:
     - jq < list_artifacts_result.json
     - jq -r '.results[].uri' < list_artifacts_result.json
 
+prepare_and_build_docker_task:
+  name: Prepare environment and build Docker image
+  only_if: $CIRRUS_BRANCH =~ 'build_arm64_.*'
+  environment:
+    APP_NAME: tdlib
+    ARCH: arm64
+    OS: macos13
+    DOCKER_OS: alpine-3.18
+    DOCKER_PASSWORD: ENCRYPTED[!50d4dbf82dca3a7fead72baadcd3bd2e2e1f9d5448d3bf4e8d6ce2769d412550fa03457a77784a282e3d2b70fd36f5b6!]
+    DOCKER_USERNAME: ENCRYPTED[!25aff238fdea08accc0f3d8444ac675374a157781f6d75c4d47ce1966f00d48901a2b22141964345dc07800383b470e2!]
+
+  fetch_version_script:
+    - export PLANNED_VERSION=$( cat .version )
+    - echo "export PLANNED_VERSION='${PLANNED_VERSION}'" >> ~/.zshrc
+
+  install_dependencies_script:
+    - source ~/.zshrc
+    - bash sbin/macos-13/install-dependencies-docker.sh
+
+  build_docker_image_script:
+    - source ~/.zshrc
+    - cd "docker/${DOCKER_OS}"
+
+    - >
+      echo "${DOCKER_PASSWORD}" |
+      docker login "docker.io"
+      -u "${DOCKER_USERNAME}"
+      --password-stdin
+
+    - >
+      docker build
+      --tag "docker.io/reinvented_stuff/tdlib:${PLANNED_VERSION}-${DOCKER_OS}"
+      --build-arg BUILD_VERSION="${PLANNED_VERSION}-${DOCKER_OS}"
+      --file Dockerfile
+      .
+    - docker push docker.io/reinvented_stuff/tdlib
+
 ...

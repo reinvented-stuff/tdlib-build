@@ -1,4 +1,5 @@
 ---
+
 yum_packages_global:
   - curl
   - curl-devel

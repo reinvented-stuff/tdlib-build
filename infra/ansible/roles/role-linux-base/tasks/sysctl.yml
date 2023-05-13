@@ -1,8 +1,8 @@
 ---
 
 - name: Setup sysctl parameters
-  block: 
-    
+  block:
+
     - name: Configure sysctl parameters for group
       sysctl:
         name: "{{ item.key }}"

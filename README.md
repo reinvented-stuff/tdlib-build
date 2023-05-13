@@ -20,27 +20,11 @@ Build matrix:
 * macos-12, amd64
 * macos-10.15, amd64
 
+Docker images:
+* alpine-3.18, amd64
+
 According to the official documentation the compiled library should be usable with the following languages:
-* Go
-* Pyhon
-* C++
-* Swift
-* Objective C
-* Object Pascal
-* Dart
-* Rust
-* Erlang
-* PHP
-* LUA
-* Ruby
-* Crystal
-* Haskell
-* Nim
-* Clojure
-* D
-* Elixir
-* C
-* G
+`Go`, `Pyhon`, `C++`, `Swift`, `Objective C`, `Object Pascal`, `Dart`, `Rust`, `Erlang`, `PHP`, `LUA`, `Ruby`, `Crystal`, `Haskell`, `Nim`, `Clojure`, `D`, `Elixir`, `C`, `G`, 
 
 # Dependencies
 
