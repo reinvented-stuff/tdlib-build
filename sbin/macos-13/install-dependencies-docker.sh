@@ -6,7 +6,7 @@
 set -e
 
 log(){
-	echo "[$(date +%F +%T)] $*"
+	echo "[$(date +"%F %T")] $*"
 }
 
 log "Start installing dependencies for Docker build"
