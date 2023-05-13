@@ -46,6 +46,9 @@ DELAY_SEC=2
 DOCKER_CHECK_RC=1
 
 while [[ "${CURRENT_ATTEMPT}" < "${MAX_ATTEMPTS}" ]]; do
+
+	CURRENT_ATTEMPT=$(( CURRENT_ATTEMPT + 1 ))
+
 	log "Attempt ${CURRENT_ATTEMPT} executing docker ps"
 
 	if docker ps; then
