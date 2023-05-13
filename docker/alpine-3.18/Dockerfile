@@ -29,4 +29,4 @@ RUN cmake --build . --target install -- -j "${BUILD_THREADS}"
 
 FROM alpine:${ALPINE_VERSION}
 
-COPY --from=builder /src/td/tdlib /src/td/tdlib
+COPY --from=builder /src/td/tdlib /tdlib
