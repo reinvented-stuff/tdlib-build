@@ -43,7 +43,7 @@ open -a Docker
 log "Manually implementing Docker initial setup"
 sudo cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
 # sudo cp /Applications/Docker.app/Contents/Resources/com.docker.vmnetd.plist /Library/LaunchDaemons/
-sudo chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
+# sudo chmod 544 /Library/PrivilegedHelperTools/com.docker.vmnetd
 # sudo chmod 644 /Library/LaunchDaemons/com.docker.vmnetd.plist
 # sudo launchctl load /Library/LaunchDaemons/com.docker.vmnetd.plist
 
