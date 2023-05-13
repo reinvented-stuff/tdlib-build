@@ -39,8 +39,6 @@ xattr -d -r com.apple.quarantine /Applications/Docker.app
 log "Starting Docker desktop"
 open -a Docker
 
-log "Looking for com.docker.vmnetd"
-sudo find / -type f -name com.docker.vmnetd 2>/dev/null
 
 log "Manually implementing Docker initial setup"
 sudo cp /Applications/Docker.app/Contents/Library/LaunchServices/com.docker.vmnetd /Library/PrivilegedHelperTools
