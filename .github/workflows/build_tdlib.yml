@@ -315,8 +315,6 @@ jobs:
       - validate_new_version
       - prepare_runners
 
-    if: 1 == 2
-
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
       PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
@@ -503,7 +501,7 @@ jobs:
           registry_address: "ghcr.io"
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
-          name: "${{ github.repository }}/${{ env.APP_NAME }}"
+          name: "${{ github.repository_owner }}/${{ env.APP_NAME }}"
           planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}"
           skip_branch_suffix: true
           working_directory: "docker/${{ matrix.runs-on.docker }}"
