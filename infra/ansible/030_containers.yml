@@ -1,3 +1,5 @@
+---
+
 - name: Manage containers
   hosts: all
   gather_facts: yes
@@ -39,3 +41,5 @@
         log_options: "{{ log_options | default(omit) }}"
         log_driver: "{{ log_driver | default(omit) }}"
       with_items: "{{ podman_containers }}"
+
+...

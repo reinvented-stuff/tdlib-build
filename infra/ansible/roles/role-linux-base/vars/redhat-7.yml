@@ -1,4 +1,5 @@
 ---
+
 yum_repo_packages_global:
   - epel-release
 
@@ -28,4 +29,5 @@ yum_packages_global:
   - iptables
   - bind-utils
   - net-tools
+
 ...

@@ -1,3 +1,5 @@
+---
+
 - name: Initial configuration
   hosts: all
   gather_facts: yes
@@ -6,3 +8,5 @@
   roles:
     - role: roles/role-linux-base
     - role: roles/role-linux-auth
+
+...

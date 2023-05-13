@@ -1,3 +1,5 @@
+---
+
 - name: Create users
   user:
     name: "{{ item.name }}"
@@ -69,7 +71,7 @@
     state: "absent"
     force: yes
   with_items: "{{ deleted_users }}"
-  tags: 
+  tags:
     - delete_users
   when: "deleted_users.0 is defined"
 
@@ -109,3 +111,5 @@
     validate: 'visudo -cf %s'
   tags:
     - sudoers
+
+...

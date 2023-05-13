@@ -1,4 +1,5 @@
 ---
+
 yum_packages_global:
   - curl
   - curl-devel
@@ -21,4 +22,6 @@ yum_packages_global:
   - bind-utils
   - net-tools
   - podman
+  - podman-docker
+
 ...

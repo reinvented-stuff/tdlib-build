@@ -1,7 +1,7 @@
 ---
 
 - name: Setup systemd services
-  block: 
+  block:
 
     - name: Configure systemd services for host
       systemd:
@@ -11,7 +11,7 @@
         daemon_reexec: "{{ item.daemon_reexec | default(omit) }}"
         enabled: "{{ item.enabled | default(omit) }}"
         masked: "{{ item.masked | default(omit) }}"
-      with_items: 
+      with_items:
         - "{{ systemd_services_host }}"
 
     - name: Configure systemd services for group
@@ -22,7 +22,7 @@
         daemon_reexec: "{{ item.daemon_reexec | default(omit) }}"
         enabled: "{{ item.enabled | default(omit) }}"
         masked: "{{ item.masked | default(omit) }}"
-      with_items: 
+      with_items:
         - "{{ systemd_services_group }}"
 
   tags:

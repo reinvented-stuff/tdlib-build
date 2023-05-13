@@ -10,7 +10,7 @@
           "{{ swap_file_path }}"
 
     - name: Set swap file permissions
-      file: 
+      file:
         path: "{{ swap_file_path }}"
         owner: root
         group: root
@@ -25,7 +25,7 @@
       when: swapfile.stdout.find('swap file') == -1
 
     - name: Create an entry in fstab for swap file
-      mount: 
+      mount:
         name: none
         src: "{{ swap_file_path }}"
         fstype: swap
@@ -35,7 +35,7 @@
         state: present
 
     - name: Mount swap file
-      command: swapon --all --ifexists --fixpgsz 
+      command: swapon --all --ifexists --fixpgsz
 
   when:
     - swap_file_enabled | bool == True

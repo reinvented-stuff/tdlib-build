@@ -1,4 +1,5 @@
 ---
+
 sysctl_params_global: []
 sysctl_params_group: []
 sysctl_params_host: []
@@ -18,4 +19,5 @@ nameservers: []
 swap_file_enabled: no
 swap_file_path: /swap
 swap_file_size_mb: 1024
+
 ...

@@ -1,7 +1,7 @@
 ---
 
 - name: Setup yum packages and repos
-  block: 
+  block:
 
     - name: Install yum repo packages
       yum:
@@ -11,7 +11,7 @@
         - "{{ yum_repo_packages_global }}"
         - "{{ yum_repo_packages_group }}"
         - "{{ yum_repo_packages_host }}"
-      tags: 
+      tags:
         - packages
 
 
@@ -23,7 +23,7 @@
         - "{{ yum_packages_global }}"
         - "{{ yum_packages_group }}"
         - "{{ yum_packages_host }}"
-      tags: 
+      tags:
         - packages
 
   tags:

@@ -1,3 +1,5 @@
+---
+
 - name: Initialise github runner
   hosts: all
   gather_facts: yes

@@ -1,3 +1,5 @@
+---
+
 galaxy_info:
   author: Pavel Kim
   description: Initialises linux server generally
@@ -12,3 +14,4 @@ galaxy_info:
 
 dependencies: []
 
+...
