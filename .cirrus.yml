@@ -69,7 +69,7 @@ prepare_and_build_task:
 
 prepare_and_build_docker_task:
   name: Prepare environment and build Docker image
-  only_if: $CIRRUS_BRANCH =~ 'dev-cirrus.*|build_.*'
+  only_if: $CIRRUS_BRANCH =~ 'build_arm64_.*'
   environment:
     APP_NAME: tdlib
     ARCH: arm64
