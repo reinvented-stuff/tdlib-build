@@ -512,6 +512,8 @@ jobs:
             echo "No dependencies install script found: '${DEPENDENCIES_INSTALL_SCRIPT}'"
           fi
 
+          sudo yum install -y podman podman-docker
+
 
       - name: Build Docker image (ghcr)
         id: build_docker_image_ghcr
