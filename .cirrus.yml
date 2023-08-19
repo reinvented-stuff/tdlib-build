@@ -5,10 +5,11 @@ macos_instance:
 
 prepare_and_build_task:
   name: Prepare environment and build
-  only_if: $CIRRUS_BRANCH =~ 'build_.*'
+  only_if: $CIRRUS_BRANCH =~ 'build_.*|dev-artifacts-in-google-bucket'
   environment:
-    ARTIFACTORY_RW_TOKEN: ENCRYPTED[!0b4f793daee14bc59cc8d5e42e8fbd0cae5b7c2e94e5ace6fec815999058cc2d14804ec0b0eedd8b402c182c7b7acd88!]
-    ARTIFACTORY_REPO_URL: ENCRYPTED[!2570f878f406c2bf1264238eeda0507248b1ec7a29f9a950ce5c0dd56fd7f57e4e05c78360bdfca334cc0026ac7c805b!]
+    GCLOUD_VERSION: 443.0.0
+    GCP_SA_KEY: ENCRYPTED[!83a845167a69fcdeff764334c5f21172f3523786d185566af2664b18f91e50ab0e34ec519f368c848f856ad72cdb8e32!]
+    GCP_BUCKET_NAME: ENCRYPTED[!a63827fa8915e21956f3d7ff574ee08ea3fe92007f5397d6ac7998aea04d5394319220b650afea04d99da10780c2a5be!]
     ARTIFACT_TARGZ_NAME: ""
     APP_NAME: tdlib
     ARCH: arm64
@@ -23,6 +24,15 @@ prepare_and_build_task:
   install_dependencies_script:
     - source ~/.zshrc
     - bash sbin/macos-13/install-dependencies.sh
+
+  upload_artifacts_dependencies_script:
+    - curl -o "google-cloud-cli-${GCLOUD_VERSION}-linux-arm.tar.gz" "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_VERSION}-linux-arm.tar.gz"
+    - tar -xf "google-cloud-cli-${GCLOUD_VERSION}-linux-x86.tar.gz"
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash ./google-cloud-sdk/install.sh
+    - echo "${GCP_SA_KEY}" > svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
+    - gcloud auth activate-service-account --key-file=svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
+    - gcloud auth list
+    - echo "GCP_OAUTH2_TOKEN=$(gcloud auth print-access-token)" >> ~/.zshrc
 
   checkout_td_script: 
     - source ~/.zshrc
@@ -44,12 +54,10 @@ prepare_and_build_task:
     - source ~/.zshrc
     - >-
       curl
-      -o upload_to_artifactory_result.json
       -X PUT
-      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
+      -H "Authorization: Bearer ${GCP_OAUTH2_TOKEN}"
       -T "${ARTIFACT_TARGZ_NAME}"
-      "${ARTIFACTORY_REPO_URL}/${APP_NAME}/${ARTIFACT_TARGZ_NAME}"
-
+      "https://storage.googleapis.com/${GCP_BUCKET_NAME}/${ARTIFACT_TARGZ_NAME}"
 
   list_artifacts_script:
     - source ~/.zshrc
@@ -57,15 +65,13 @@ prepare_and_build_task:
       curl
       -o list_artifacts_result.json
       -X GET
-      -H "Authorization: Bearer ${ARTIFACTORY_RW_TOKEN}"
-      -H "Content-Type: text/plain"
-      "${ARTIFACTORY_REPO_URL}/api/search/artifact?repos=${APP_NAME}&name=${PLANNED_VERSION}"
-
+      -H "Content-Type: application/json"
+      "https://www.googleapis.com/storage/v1/b/${GCP_BUCKET_NAME}/o/"
 
   results_printout_script:
-    - jq < upload_to_artifactory_result.json
     - jq < list_artifacts_result.json
-    - jq -r '.results[].uri' < list_artifacts_result.json
+    - jq -r '.items[].mediaLink' < list_artifacts_result.json
+
 
 prepare_and_build_docker_task:
   name: Prepare environment and build Docker image
