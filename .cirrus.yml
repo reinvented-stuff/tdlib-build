@@ -26,6 +26,7 @@ prepare_and_build_task:
     - bash sbin/macos-13/install-dependencies.sh
 
   upload_artifacts_dependencies_script:
+    - source ~/.zshrc
     - curl -o "google-cloud-cli-${GCLOUD_VERSION}-linux-arm.tar.gz" "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_VERSION}-linux-arm.tar.gz"
     - tar -xf "google-cloud-cli-${GCLOUD_VERSION}-linux-x86.tar.gz"
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash ./google-cloud-sdk/install.sh
