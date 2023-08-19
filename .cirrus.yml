@@ -31,7 +31,8 @@ prepare_and_build_task:
     - ls -la
     - tar -zxf "google-cloud-cli-${GCLOUD_VERSION}-darwin-arm.tar.gz"
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash ./google-cloud-sdk/install.sh
-    - source ./google-cloud-sdk/path.zsh.inc
+    - echo "export PATH=${PWD}/google-cloud-sdk/bin:\$PATH" >> ~/.zshrc
+    - source ~/.zshrc
     - echo "${GCP_SA_KEY}" > svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
     - gcloud auth activate-service-account --key-file=svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
     - gcloud auth list
