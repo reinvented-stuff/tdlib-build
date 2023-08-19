@@ -5,7 +5,7 @@ macos_instance:
 
 prepare_and_build_task:
   name: Prepare environment and build
-  only_if: $CIRRUS_BRANCH =~ 'build_.*|dev-artifacts-in-google-bucket'
+  only_if: $CIRRUS_BRANCH =~ 'build_.*'
   environment:
     GCLOUD_VERSION: 443.0.0
     GCP_SA_KEY: ENCRYPTED[!83a845167a69fcdeff764334c5f21172f3523786d185566af2664b18f91e50ab0e34ec519f368c848f856ad72cdb8e32!]
@@ -21,21 +21,22 @@ prepare_and_build_task:
     - echo "export PLANNED_VERSION='${PLANNED_VERSION}'" >> ~/.zshrc
     - echo "export ARTIFACT_TARGZ_NAME='${ARTIFACT_TARGZ_NAME}'" >> ~/.zshrc
 
-  install_dependencies_script:
+  install_various_dependencies_script:
     - source ~/.zshrc
     - bash sbin/macos-13/install-dependencies.sh
 
-  upload_artifacts_dependencies_script:
-    - source ~/.zshrc
     - curl -o "google-cloud-cli-${GCLOUD_VERSION}-darwin-arm.tar.gz" "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_VERSION}-darwin-arm.tar.gz"
     - ls -la
     - tar -zxf "google-cloud-cli-${GCLOUD_VERSION}-darwin-arm.tar.gz"
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash ./google-cloud-sdk/install.sh
+
     - echo "export PATH=${PWD}/google-cloud-sdk/bin:\$PATH" >> ~/.zshrc
     - source ~/.zshrc
+
     - echo "${GCP_SA_KEY}" > svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
     - gcloud auth activate-service-account --key-file=svc-tdlib-github-rw@tdlib-396418.iam.gserviceaccount.com.json
     - gcloud auth list
+
     - echo "GCP_OAUTH2_TOKEN=$(gcloud auth print-access-token)" >> ~/.zshrc
 
   checkout_td_script: 
