@@ -1,10 +1,10 @@
 ARG ALPINE_VERSION=3.18
-ARG APP_VERSION_COMMIT=master
 
 FROM alpine:${ALPINE_VERSION} AS builder
 
 ARG BUILD_THREADS=4
 ARG TD_REPO_URL="https://github.com/tdlib/td.git"
+ARG APP_VERSION_COMMIT=master
 
 RUN apk update
 RUN apk upgrade
