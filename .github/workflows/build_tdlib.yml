@@ -529,6 +529,7 @@ jobs:
           working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
             APP_VERSION=${{ env.PLANNED_VERSION }}
+            APP_VERSION_COMMIT=${{ env.PLANNED_VERSION_COMMIT }}
 
 
       - name: Send out notification about docker image build

@@ -1,4 +1,5 @@
 ARG ALPINE_VERSION=3.18
+ARG APP_VERSION_COMMIT=master
 
 FROM alpine:${ALPINE_VERSION} AS builder
 
@@ -13,6 +14,9 @@ RUN mkdir -p -v /src
 WORKDIR /src
 
 RUN git clone "${TD_REPO_URL}" "/src/td"
+
+WORKDIR /src/td
+RUN git checkout "${APP_VERSION_COMMIT}"
 
 RUN mkdir -p -v /src/td/build
 WORKDIR /src/td/build
