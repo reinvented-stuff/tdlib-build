@@ -365,6 +365,7 @@ jobs:
         run: |
           mkdir -pv td
           git clone https://github.com/tdlib/td.git td
+          git -C td checkout "${{ env.PLANNED_VERSION_COMMIT }}"
 
 
       - name: Print out directory contents
