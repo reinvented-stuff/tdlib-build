@@ -26,5 +26,6 @@ yum_packages_global:
   - net-tools
   - postfix
   - podman
+  - podman-docker
 
 ...
