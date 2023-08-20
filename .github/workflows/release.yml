@@ -89,22 +89,19 @@ jobs:
           fetch-depth: 0
 
 
-      - name: List artifacts from JFrog Artifactory
+      - name: List artifacts from Google Bucket
         id: list_artifacts
         shell: bash
         run: >-
           curl
           -o list_artifacts_result.json
           -X GET
-          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-          -H "Content-Type: text/plain"
-          "${{ secrets.ARTIFACTORY_BASEURL }}/api/search/artifact?repos=${{ env.APP_NAME }}&name=${{ env.PLANNED_VERSION }}"
+          -H "Content-Type: application/json"
+          "https://www.googleapis.com/storage/v1/b/${{ secrets.GCP_BUCKET_NAME }}/o/"
 
-
-          jq -r '.results[].uri' < list_artifacts_result.json | tee artifact_urls.txt
-
+          jq -r ".items[] | select(.name | test(\"${{ env.PLANNED_VERSION }}\") ) | .mediaLink" < list_artifacts_result.json
+          
           cat -n artifact_urls.txt
-
           echo "artifact_urls_file=artifact_urls.txt" >> "${GITHUB_OUTPUT}"
 
 
@@ -210,7 +207,7 @@ jobs:
             <b>Release ${{env.APP_NAME}} ${{env.PLANNED_RELEASE_NAME}}:</b>
 
             <b>Artifactory:</b>
-            <code>${{ secrets.ARTIFACTORY_REPO_URL }}</code>
+            <code>https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}</code>
 
             <b>Release:</b>
             <code>https://github.com/${{ github.repository }}/releases/tag/${{env.PLANNED_VERSION}}</code>
