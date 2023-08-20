@@ -21,10 +21,6 @@ prepare_and_build_task:
     - echo "export PLANNED_VERSION='${PLANNED_VERSION}'" >> ~/.zshrc
     - echo "export ARTIFACT_TARGZ_NAME='${ARTIFACT_TARGZ_NAME}'" >> ~/.zshrc
 
-    - git --git-dir=td/.git log --pretty="format:%H" --grep="Update version to ${PLANNED_VERSION}" > .tdlib_version_commit
-    - echo "export PLANNED_VERSION_COMMIT='$( cat .tdlib_version_commit )'" >> ~/.zshrc
-
-
   install_various_dependencies_script:
     - source ~/.zshrc
     - bash sbin/macos-13/install-dependencies.sh
@@ -47,7 +43,13 @@ prepare_and_build_task:
     - source ~/.zshrc
     - mkdir -pv td
     - git clone https://github.com/tdlib/td.git td
+
+    - git --git-dir=td/.git log --pretty="format:%H" --grep="Update version to ${PLANNED_VERSION}" > .tdlib_version_commit
+    - echo "export PLANNED_VERSION_COMMIT='$( cat .tdlib_version_commit )'" >> ~/.zshrc
+
+    - source ~/.zshrc
     - git --git-dir=td/.git checkout "${PLANNED_VERSION_COMMIT}"
+
     - ls -lAth .
 
   build_td_script:
