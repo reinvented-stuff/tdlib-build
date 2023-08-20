@@ -76,7 +76,7 @@ jobs:
         shell: bash
         run: >-
           VERSION_COMMIT=$(
-          git -C td
+          git --git-dir=td/.git
           log
           --pretty="format:%H"
           --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}"
@@ -365,6 +365,7 @@ jobs:
         run: |
           mkdir -pv td
           git clone https://github.com/tdlib/td.git td
+          git --git-dir=td/.git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
 
 
       - name: Print out directory contents
@@ -489,6 +490,7 @@ jobs:
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
       APP_NAME: "tdlib"
 
@@ -528,6 +530,7 @@ jobs:
           working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
             APP_VERSION=${{ env.PLANNED_VERSION }}
+            APP_VERSION_COMMIT=${{ env.PLANNED_VERSION_COMMIT }}
 
 
       - name: Send out notification about docker image build

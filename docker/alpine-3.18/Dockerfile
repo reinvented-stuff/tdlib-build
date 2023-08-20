@@ -4,6 +4,7 @@ FROM alpine:${ALPINE_VERSION} AS builder
 
 ARG BUILD_THREADS=4
 ARG TD_REPO_URL="https://github.com/tdlib/td.git"
+ARG APP_VERSION_COMMIT=master
 
 RUN apk update
 RUN apk upgrade
@@ -13,6 +14,9 @@ RUN mkdir -p -v /src
 WORKDIR /src
 
 RUN git clone "${TD_REPO_URL}" "/src/td"
+
+WORKDIR /src/td
+RUN git checkout "${APP_VERSION_COMMIT}"
 
 RUN mkdir -p -v /src/td/build
 WORKDIR /src/td/build
