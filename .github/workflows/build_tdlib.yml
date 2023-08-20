@@ -490,6 +490,7 @@ jobs:
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+      PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
       BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
       APP_NAME: "tdlib"
 
