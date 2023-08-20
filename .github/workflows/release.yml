@@ -99,7 +99,7 @@ jobs:
           -H "Content-Type: application/json"
           "https://www.googleapis.com/storage/v1/b/${{ secrets.GCP_BUCKET_NAME }}/o/"
 
-          jq -r ".items[] | select(.name | test(\"${{ env.PLANNED_VERSION }}\") ) | .mediaLink" < list_artifacts_result.json
+          jq -r ".items[] | select(.name | test(\"${{ env.PLANNED_VERSION }}\") ) | .mediaLink" < list_artifacts_result.json > artifact_urls.txt
           
           cat -n artifact_urls.txt
           echo "artifact_urls_file=artifact_urls.txt" >> "${GITHUB_OUTPUT}"
