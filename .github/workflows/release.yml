@@ -114,7 +114,7 @@ jobs:
           while read artifact_url; do
 
             artifact="${artifact_url##*/}"
-            artifact="${artifact_url%%\?*}"
+            artifact="${artifact%%\?*}"
 
             echo "Downloading artifact ${artifact}"
 
@@ -180,7 +180,7 @@ jobs:
           while read artifact_url; do
 
             artifact="${artifact_url##*/}"
-            artifact="${artifact_url%%\?*}"
+            artifact="${artifact%%\?*}"
 
             echo "Processing artifact ${artifact}"
 
