@@ -18,7 +18,10 @@ Build matrix:
 * ubuntu-22.04, amd64
 * macos-13, arm64
 * macos-12, amd64
-* macos-10.15, amd64
+
+Docker images:
+* alpine-3.18, amd64
+* alpine-3.18, arm64
 
 Docker images:
 * alpine-3.18, amd64

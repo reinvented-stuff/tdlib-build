@@ -106,8 +106,6 @@ jobs:
     needs:
       - validate_new_version
 
-    if: 1 == 2
-
     steps:
 
       - name: Check out this repository
@@ -312,7 +310,7 @@ jobs:
 
     needs:
       - validate_new_version
-      # - prepare_runners
+      - prepare_runners
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
@@ -513,6 +511,8 @@ jobs:
           else
             echo "No dependencies install script found: '${DEPENDENCIES_INSTALL_SCRIPT}'"
           fi
+
+          sudo yum install -y podman podman-docker
 
 
       - name: Build Docker image (ghcr)
