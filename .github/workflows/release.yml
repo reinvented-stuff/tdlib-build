@@ -113,25 +113,16 @@ jobs:
 
           while read artifact_url; do
 
-            artifact=$(basename "${artifact_url}")
+            artifact="${artifact_url##*/}"
+            artifact="${artifact_url%%\?*}"
 
             echo "Downloading artifact ${artifact}"
 
           curl
           -v
-          -o "${artifact}.json"
-          -X GET
-          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-          "${artifact_url}"
-
-            artifact_download_url=$( jq -r '.downloadUri' < "${artifact}.json" )
-
-          curl
-          -v
           -o "${artifact}"
           -X GET
-          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-          "${artifact_download_url}"
+          "${artifact_url}"
 
           done < "${{ steps.list_artifacts.outputs.artifact_urls_file }}"
 
@@ -188,7 +179,8 @@ jobs:
         run: >-
           while read artifact_url; do
 
-            artifact=$(basename "${artifact_url}")
+            artifact="${artifact_url##*/}"
+            artifact="${artifact_url%%\?*}"
 
             echo "Processing artifact ${artifact}"
 
