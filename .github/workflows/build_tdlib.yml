@@ -157,6 +157,7 @@ jobs:
 
             echo "Token retrival failed: ${RESULT_CODE}!=${RESULT_CODE_SUCCESS}";
             echo "Token retrival result: $(cat "${RESULT_PAYLOAD_FILENAME}")";
+            exit 5;
 
           fi
 
