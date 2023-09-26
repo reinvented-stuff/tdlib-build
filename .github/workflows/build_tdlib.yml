@@ -124,34 +124,44 @@ jobs:
         id: get_ghr_token
         shell: bash
         run: >-
-          TOKEN=$(
+          RESULT_PAYLOAD_FILENAME="${PWD}/.ghr_token_result_payload.json";
+          RESULT_CODE_FILENAME="${PWD}/.ghr_token_result_code.txt";
+          TOKEN_FILENAME="${PWD}/.ghr_token";
+
           curl
+          -o "${RESULT_PAYLOAD_FILENAME}"
+          -w "%{http_code}"
           -X POST
           -H "Accept: application/vnd.github+json"
           -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
-          "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token"
-          | jq ".token"
-          )
+          "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token" > "${RESULT_CODE_FILENAME}"
 
-          TOKEN_FILENAME="${PWD}/.ghr_token"
+          RESULT_CODE=$(cat "${RESULT_CODE_FILENAME}");
+          RESULT_CODE_SUCCESS="201";
 
-          echo "${TOKEN}" > "${TOKEN_FILENAME}"
+          echo "Token retrival result code: '${RESULT_CODE}'";
 
-          if [[ -z "${TOKEN}" ]]; then
+          if [[ "${RESULT_CODE}" == "${RESULT_CODE_SUCCESS}" ]]; then
 
-            echo "Error while getting GitHub runner registration token!"
+            TOKEN=$( jq ".token" < "${RESULT_PAYLOAD_FILENAME}");
+            echo "Token length: ${#TOKEN}";
 
-            exit 2
+            if [[ "${TOKEN}" == "null" ]]; then
+              echo "Token retrival failed: No .token in the payload";
+              exit 4
+            fi
+
+            echo "${TOKEN}" > "${TOKEN_FILENAME}";
 
           else
 
-            echo "Successfully obtained GitHub runner registration token."
-
-            echo "token=${TOKEN}" >> "${GITHUB_OUTPUT}"
-
-            echo "token_filename=${TOKEN_FILENAME}" >> "${GITHUB_OUTPUT}"
+            echo "Token retrival failed: ${RESULT_CODE}!=${RESULT_CODE_SUCCESS}";
+            echo "Token retrival result: $(cat "${RESULT_PAYLOAD_FILENAME}")";
 
           fi
+
+          echo "token=${TOKEN}" >> "${GITHUB_OUTPUT}";
+          echo "token_filename=${TOKEN_FILENAME}" >> "${GITHUB_OUTPUT}";
 
 
       - name: Render SSH private key from a secret
