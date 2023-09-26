@@ -7,16 +7,6 @@
   strategy: free
 
   tasks:
-    - name: Gather facts on several containers
-      containers.podman.podman_container_info:
-        name: "{{ item.name }}"
-      register: containers_info
-      with_items: "{{ podman_containers }}"
-
-    - name: Print out current containers info
-      debug:
-        var: containers_info['results'] | selectattr('containers') | selectattr("Name") | list
-
     - name: Create required directories
       file:
         path: "{{ item.path }}"
@@ -41,5 +31,17 @@
         log_options: "{{ log_options | default(omit) }}"
         log_driver: "{{ log_driver | default(omit) }}"
       with_items: "{{ podman_containers }}"
+
+
+    - name: Gather facts on several containers
+      containers.podman.podman_container_info:
+        name: "{{ item.name }}"
+      register: containers_info
+      with_items: "{{ podman_containers }}"
+
+
+    - name: Print out current containers info
+      debug:
+        var: containers_info['results'] | selectattr('containers') | selectattr("Name") | list
 
 ...
