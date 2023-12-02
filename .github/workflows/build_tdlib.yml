@@ -384,9 +384,15 @@ jobs:
         run: |
           mkdir -pv td
           git clone https://github.com/tdlib/td.git td
-          ls -la td/
-          git --git-dir=td/.git status
-          git --git-dir=td/.git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
+
+
+      - name: Check out specific commit in tdlib repo
+        id: checkout_tdlib_repo_commit
+        shell: bash
+        working-directory: td
+        run: |
+          git status
+          git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
 
 
       - name: Print out directory contents
