@@ -63,14 +63,6 @@ jobs:
           fail_on_error: false
 
 
-      - name: Print out dir contents
-        id: tmp_ls
-        shell: bash
-        run: |
-          pwd
-          ls -la .
-
-
       - name: Check out tdlib repo
         uses: actions/checkout@v4
         with:
@@ -376,6 +368,15 @@ jobs:
         shell: bash
         run: |
           bash "sbin/${{ matrix.runs-on.os }}/install-dependencies.sh"
+
+
+      - name: Print out dir contents
+        id: tmp_ls
+        shell: bash
+        run: |
+          pwd
+          ls -la .
+          ls -la td/
 
 
       - name: Check out tdlib repo
