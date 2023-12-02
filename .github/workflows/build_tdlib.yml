@@ -376,7 +376,6 @@ jobs:
         run: |
           pwd
           ls -la .
-          ls -la td/
 
 
       - name: Check out tdlib repo
@@ -385,6 +384,8 @@ jobs:
         run: |
           mkdir -pv td
           git clone https://github.com/tdlib/td.git td
+          ls -la td/
+          git --git-dir=td/.git status
           git --git-dir=td/.git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
 
 
