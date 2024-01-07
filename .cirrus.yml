@@ -48,6 +48,10 @@ prepare_and_build_task:
     - echo "export PLANNED_VERSION_COMMIT='$( cat .tdlib_version_commit )'" >> ~/.zshrc
 
     - source ~/.zshrc
+    - git --git-dir=td/.git fetch --all
+    - git stash
+    - git stash list
+    - git stash show
     - git --git-dir=td/.git checkout "${PLANNED_VERSION_COMMIT}"
 
     - ls -lAth .
