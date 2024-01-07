@@ -49,7 +49,7 @@ jobs:
     steps:
 
       - name: Check out this repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -64,7 +64,7 @@ jobs:
 
 
       - name: Check out tdlib repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: tdlib/td
@@ -370,13 +370,29 @@ jobs:
           bash "sbin/${{ matrix.runs-on.os }}/install-dependencies.sh"
 
 
+      - name: Print out dir contents
+        id: tmp_ls
+        shell: bash
+        run: |
+          pwd
+          ls -la .
+
+
       - name: Check out tdlib repo
         id: checkout_tdlib_repo
         shell: bash
         run: |
           mkdir -pv td
           git clone https://github.com/tdlib/td.git td
-          git --git-dir=td/.git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
+
+
+      - name: Check out specific commit in tdlib repo
+        id: checkout_tdlib_repo_commit
+        shell: bash
+        working-directory: td
+        run: |
+          git status
+          git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
 
 
       - name: Print out directory contents
