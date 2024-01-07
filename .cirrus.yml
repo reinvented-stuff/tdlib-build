@@ -50,9 +50,6 @@ prepare_and_build_task:
 
     - source ~/.zshrc
     - git fetch --all
-    - git stash || echo "Exited $?"
-    - git stash list || echo "Exited $?"
-    - git stash show || echo "Exited $?"
     - git checkout "${PLANNED_VERSION_COMMIT}"
 
     - ls -lAth .
