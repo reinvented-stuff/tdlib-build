@@ -16,7 +16,7 @@ yum_packages_global:
   - vim
   - wget
   - at
-  - mailx
+  - s-nail
   - jq
   - python3-pip
   - bind-utils
