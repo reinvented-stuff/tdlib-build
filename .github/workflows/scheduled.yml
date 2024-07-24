@@ -87,6 +87,23 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
+      - name: Terraform init
+        id: terraform_init
+        shell: bash
+        working-directory: infra/terraform
+        continue-on-error: true
+        env:
+          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+          TF_VAR_github_runners_count: 0
+        run: >-
+          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
+          terraform init
+          -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
+          -backend-config="access_key=${{ secrets.S3_ACCESS_KEY }}"
+          -backend-config="secret_key=${{ secrets.S3_SECRET_KEY }}"
+
+
       - name: Terraform show
         id: terraform_show
         shell: bash
