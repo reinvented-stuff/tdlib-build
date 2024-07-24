@@ -348,14 +348,14 @@ jobs:
 
       - name: Install Cloud SDK
         id: install_gcloud
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
           version: '443.0.0'
 
 
       - name: Setup Google Cloud authentication
         id: setup_gcp_authentication
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
