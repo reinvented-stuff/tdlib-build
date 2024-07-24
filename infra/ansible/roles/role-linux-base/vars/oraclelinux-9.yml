@@ -1,0 +1,27 @@
+---
+
+yum_packages_global:
+  - curl
+  - curl-devel
+  - gzip
+  - less
+  - lsof
+  - mc
+  - rsync
+  - rsyslog
+  - tmux
+  - tar
+  - tcpdump
+  - unzip
+  - vim
+  - wget
+  - at
+  - mailx
+  - jq
+  - python3-pip
+  - bind-utils
+  - net-tools
+  - podman
+  - podman-docker
+
+...
