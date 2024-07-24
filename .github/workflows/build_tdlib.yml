@@ -318,7 +318,7 @@ jobs:
             arch: amd64
 
           - os: macos-14
-            label: macos12
+            label: macos14
             arch: amd64
 
     runs-on: ${{ matrix.runs-on.os }}
