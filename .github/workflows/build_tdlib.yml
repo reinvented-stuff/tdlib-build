@@ -305,8 +305,8 @@ jobs:
             label: linux-redhat-8
             arch: amd64
 
-          - os: redhat-7
-            label: linux-redhat-7
+          - os: redhat-9
+            label: linux-redhat-9
             arch: amd64
 
           - os: ubuntu-22.04
@@ -315,6 +315,10 @@ jobs:
 
           - os: macos-12
             label: macos12
+            arch: amd64
+
+          - os: macos-14
+            label: macos14
             arch: amd64
 
     runs-on: ${{ matrix.runs-on.os }}

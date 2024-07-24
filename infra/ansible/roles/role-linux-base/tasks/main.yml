@@ -1,12 +1,12 @@
 ---
 
-- include: facts.yml
+- include_tasks: facts.yml
   tags:
     - facts
-- include: packages.yml
-- include: setup.yml
-- include: swap.yml
-- include: services.yml
-- include: sysctl.yml
+- include_tasks: packages.yml
+- include_tasks: setup.yml
+- include_tasks: swap.yml
+- include_tasks: services.yml
+- include_tasks: sysctl.yml
 
 ...

@@ -1,0 +1,31 @@
+---
+
+yum_repo_packages_global:
+  - epel-release
+
+yum_packages_global:
+  - curl
+  - curl-devel
+  - gzip
+  - less
+  - lsof
+  - mc
+  - rsync
+  - rsyslog
+  - tmux
+  - tar
+  - tcpdump
+  - unzip
+  - vim
+  - wget
+  - at
+  - s-nail
+  - jq
+  - python3-pip
+  - bind-utils
+  - net-tools
+  - postfix
+  - podman
+  - podman-docker
+
+...
