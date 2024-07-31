@@ -123,6 +123,8 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
         run: >-
+          echo '{"format_version":"0.2","terraform_version":"1.0.11","values":{"outputs":{"instance-details":{"sensitive":false,"value":[[],[]]}},"root_module":{}}}' | jq
+
           terraform show -json | tee | jq
 
           terraform show -json |
