@@ -123,20 +123,16 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
         run: >-
-
-          echo -e "\n\n\n==="
-
-          terraform show -json | tee
-          
-          echo -e "===\n\n\n"
-
           terraform show -json |
           jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
           "outputs.json"
 
+          cat outputs.json
+
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
-          $( cat outputs.json  )
+          $( cat outputs.json )
+
           EOF2
           EOF
 
