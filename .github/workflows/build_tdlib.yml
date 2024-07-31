@@ -319,7 +319,7 @@ jobs:
 
           - os: macos-14
             label: macos14
-            arch: amd64
+            arch: arm64
 
     runs-on: ${{ matrix.runs-on.os }}
 
@@ -508,10 +508,15 @@ jobs:
 
         runs-on:
 
-          - os: redhat-8
+          - os: ubuntu-22.04
             label: alpine-3.18
             arch: amd64
             docker: alpine-3.18
+
+          # - os: macos-14
+          #   label: alpine-3.18
+          #   arch: arm64
+          #   docker: alpine-3.18
 
     runs-on: ${{ matrix.runs-on.os }}
 
@@ -556,7 +561,8 @@ jobs:
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
           name: "${{ github.repository_owner }}/${{ env.APP_NAME }}"
-          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}"
+          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}-{{ matrix.runs-on.arch }}"
+          platform: "linux/{{ matrix.runs-on.arch }}"
           skip_branch_suffix: true
           working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
@@ -604,6 +610,29 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
+  docker_multi_platform_manifest:
+    name: Create manifest for Docker images
+    runs-on: ubuntu-latest
+    needs:
+      - build_matrix_docker
+
+    env:
+      PLANNED_VERSION: ${{ needs.build_matrix_docker.outputs.planned_version }}
+
+    steps:
+
+      - name: Send notification on all builds finish
+        uses: rest-gateway/notification-action@1.0.9
+        with:
+          message: |
+            Multi-platform manifest stub
+
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
   after_build:
     name: After build process
     runs-on: ubuntu-latest
@@ -612,6 +641,8 @@ jobs:
 
     needs:
       - build_matrix
+      - build_matrix_docker
+      - docker_multi_platform_manifest
 
     steps:
 

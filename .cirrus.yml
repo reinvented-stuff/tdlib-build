@@ -1,7 +1,7 @@
 ---
 
 macos_instance:
-  image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  image: ghcr.io/cirruslabs/macos-runner:sonoma
 
 prepare_and_build_task:
   name: Prepare environment and build
@@ -118,10 +118,12 @@ prepare_and_build_docker_task:
 
     - >
       docker build
-      --tag "docker.io/reinvented_stuff/tdlib:${PLANNED_VERSION}-${DOCKER_OS}"
+      --tag "docker.io/reinvented_stuff/tdlib:${PLANNED_VERSION}-${DOCKER_OS}-${ARCH}"
       --build-arg BUILD_VERSION="${PLANNED_VERSION}-${DOCKER_OS}"
+      --platform linux/${ARCH}
       --file Dockerfile
       .
+
     - docker push docker.io/reinvented_stuff/tdlib
 
 ...
