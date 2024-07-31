@@ -7,6 +7,7 @@ name: Scheduled
 on:
   schedule:
     - cron: '35 15 * * *'
+  workflow_dispatch:
 
 jobs:
 
@@ -30,13 +31,15 @@ jobs:
 
 
       - name: Check out code
-        uses: actions/checkout@v2
+        id: checkout_code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
 
       - name: Check out tdlib repo
-        uses: actions/checkout@v3
+        id: checkout_tdlib
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: tdlib/td
@@ -87,6 +90,13 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
+      - name: Setup Terraform
+        id: setup_terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.0.11
+
+
       - name: Terraform init
         id: terraform_init
         shell: bash
@@ -117,9 +127,12 @@ jobs:
           jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
           "outputs.json"
 
+          cat outputs.json
+
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
-          $( cat outputs.json  )
+          $( cat outputs.json )
+
           EOF2
           EOF
 
@@ -137,6 +150,11 @@ jobs:
             ${{ steps.terraform_show.outputs.instances }}
 
             <b>Outcome:</b>
+            checkout code: ${{ steps.checkout_code.outcome }}
+            checkout tdlib: ${{ steps.checkout_tdlib.outcome }}
+            get last version: ${{ steps.get_last_version.outcome }}
+            match versions: ${{ steps.match_versions.outcome }}
+            setup terraform: ${{ steps.setup_terraform.outcome }}
             terraform init: ${{ steps.terraform_init.outcome }}
             terraform plan: ${{ steps.terraform_plan.outcome }}
             terraform apply: ${{ steps.terraform_apply.outcome }}
@@ -145,18 +163,5 @@ jobs:
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
           rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
-
-
-      - name: Upload .version file to JFrog Artifactory (to keep the account alive)
-        id: upload_to_artifactory
-        shell: bash
-        run: >-
-          curl
-          -o upload_to_artifactory_result.json
-          -X PUT
-          -H "Authorization: Bearer ${{ secrets.ARTFACTORY_RW_TOKEN }}"
-          -T ".version"
-          "${{ secrets.ARTIFACTORY_REPO_URL }}/.version"
-
 
 ...
