@@ -123,7 +123,7 @@ jobs:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
         run: >-
-          terraform show -json | jq
+          terraform show -json | tee
 
           terraform show -json |
           jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
