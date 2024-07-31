@@ -124,7 +124,9 @@ jobs:
           TF_VAR_github_runners_count: 1
         run: >-
 
-          terraform show -json | tee | hexdump -C
+          echo -e "\n\n\n==="
+          terraform show -json | tee
+          echo -e "===\n\n\n"
 
           terraform show -json |
           jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
