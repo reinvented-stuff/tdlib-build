@@ -73,9 +73,11 @@ jobs:
         shell: bash
         run: >-
           CURRENT_VERSION="$( cat .version )"
-          echo "current_version=false" >> "${GITHUB_OUTPUT}"
+          echo "current_version=${CURRENT_VERSION}" >> "${GITHUB_OUTPUT}"
 
-          if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${CURRENT_VERSION}" ]]; then
+          echo "Comparing '${{ steps.get_last_version.outputs.last_version }}' and '${CURRENT_VERSION}'"
+
+          if [[ "${{ steps.get_last_version.outputs.last_version }}" == "${CURRENT_VERSION}" ]]; then
             echo "found_new=false" >> "${GITHUB_OUTPUT}"
             echo "caption=No new version found" >> "${GITHUB_OUTPUT}"
           else
