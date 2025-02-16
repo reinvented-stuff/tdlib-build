@@ -148,7 +148,7 @@ jobs:
 
 
       - name: Upload terraform apply log
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v4
         id: upload_terraform_apply_log
         if: always()
         with:
@@ -159,7 +159,7 @@ jobs:
 
 
       - name: Upload terraform show result
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v4
         id: upload_terraform_show_result
         if: always()
         with:
