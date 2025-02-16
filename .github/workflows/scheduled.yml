@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: '35 15 * * *'
   workflow_dispatch:
+    inputs:
+      prepare_changes:
+        required: true
+        default: false
+        type: boolean
+        description: Create feature branch
 
 jobs:
 
@@ -98,6 +104,7 @@ jobs:
         run: |
 
           echo "steps.match_versions.outputs.match='${{ steps.match_versions.outputs.match }}'"
+          echo "github.event.inputs.prepare_changes='${{ github.event.inputs.prepare_changes }}'"
 
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@local'
@@ -113,7 +120,7 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}
           git push origin build_${{ steps.get_last_version.outputs.last_version }}
 
-          run: gh pr create -B master -H build_${{ steps.get_last_version.outputs.last_version }} \
+          gh pr create -B master -H build_${{ steps.get_last_version.outputs.last_version }} \
             --title 'gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}' \
             --body 'v${{ steps.get_last_version.outputs.last_version }}'
 
