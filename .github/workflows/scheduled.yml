@@ -72,6 +72,7 @@ jobs:
         id: match_versions
         shell: bash
         run: >-
+          ls -lah . 
           CURRENT_VERSION="$( cat .version )"
           echo "current_version=${CURRENT_VERSION}" >> "${GITHUB_OUTPUT}"
 
