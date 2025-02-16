@@ -98,11 +98,16 @@ jobs:
 
       - name: Create a branch with a change for the found version
         id: create_new_version_branch
-        if: steps.match_versions.outputs.match == 'true' or \
-            github.event.inputs.prepare_changes == 'true'
+        # if: steps.match_versions.outputs.match == 'true' or github.event.inputs.prepare_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+
+          echo "steps.match_versions.outputs.match: ${{ steps.match_versions.outputs.match == 'true' }}"
+          echo "github.event.inputs.prepare_changes: ${{ github.event.inputs.prepare_changes == 'true' }}"
+
+          exit 0
+
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@local'
 
