@@ -90,6 +90,30 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
+      - name: Create a branch with a change for the found version
+        id: create_new_version_branch
+        if: steps.match_versions.outputs.match == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@local'
+
+          [[ -f .version ]] || { echo "Error: no .version file found"; exit 2; }
+
+          git checkout -b build_${{ steps.get_last_version.outputs.last_version }}
+          echo "${{ steps.get_last_version.outputs.last_version }}" > .version
+
+          git add .version
+          git commit -a -m "gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}"
+
+          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}
+          git push origin build_${{ steps.get_last_version.outputs.last_version }}
+
+          run: gh pr create -B master -H build_${{ steps.get_last_version.outputs.last_version }} \
+            --title 'gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}' \
+            --body 'v${{ steps.get_last_version.outputs.last_version }}'
+
       - name: Setup Terraform
         id: setup_terraform
         uses: hashicorp/setup-terraform@v3
