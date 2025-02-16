@@ -112,7 +112,7 @@ output "instance-details" {
 
     flatten([
       for item in vultr_instance.ghr-redhat-9[*] : {
-        type = "ghr-redhat-8"
+        type = "ghr-redhat-9"
         name = item.label
         ipv4 = item.main_ip
         ipv6 = item.v6_main_ip
