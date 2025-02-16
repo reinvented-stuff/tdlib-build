@@ -98,15 +98,10 @@ jobs:
 
       - name: Create a branch with a change for the found version
         id: create_new_version_branch
-        # if: steps.match_versions.outputs.match == 'true' or github.event.inputs.prepare_changes == 'true'
+        if: steps.match_versions.outputs.match == 'true' or github.event.inputs.prepare_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-
-          echo "steps.match_versions.outputs.match: ${{ steps.match_versions.outputs.match == 'true' }}"
-          echo "github.event.inputs.prepare_changes: ${{ github.event.inputs.prepare_changes == 'true' }}"
-
-          exit 0
 
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@local'
@@ -127,6 +122,7 @@ jobs:
           gh pr create -B master -H build_${{ steps.get_last_version.outputs.last_version }} \
             --title 'gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}' \
             --body 'v${{ steps.get_last_version.outputs.last_version }}'
+
 
       - name: Setup Terraform
         id: setup_terraform
