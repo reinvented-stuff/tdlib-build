@@ -313,10 +313,6 @@ jobs:
             label: linux-ubuntu-22.04
             arch: amd64
 
-          - os: macos-12
-            label: macos12
-            arch: amd64
-
           - os: macos-14
             label: macos14
             arch: arm64
@@ -540,14 +536,14 @@ jobs:
 
       - name: Build Docker image (ghcr)
         id: build_docker_image_ghcr
-        uses: reinvented-stuff/build-docker-image-action@2.2.0
+        uses: reinvented-stuff/build-docker-image-action@2.6.0
         with:
           registry_address: "ghcr.io"
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
           name: "${{ github.repository_owner }}/${{ env.APP_NAME }}"
-          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}-{{ matrix.runs-on.arch }}"
-          platform: "linux/{{ matrix.runs-on.arch }}"
+          planned_version: "${{ env.PLANNED_VERSION }}-${{ matrix.runs-on.docker }}-${{ matrix.runs-on.arch }}"
+          platform: "linux/${{ matrix.runs-on.arch }}"
           skip_branch_suffix: true
           working_directory: "docker/${{ matrix.runs-on.docker }}"
           build_args: |-
