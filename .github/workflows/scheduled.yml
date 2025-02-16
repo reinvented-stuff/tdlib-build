@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: '35 15 * * *'
   workflow_dispatch:
+    inputs:
+      prepare_changes:
+        required: true
+        default: false
+        type: boolean
+        description: Create feature branch
 
 jobs:
 
@@ -35,6 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
 
       - name: Check out tdlib repo
@@ -59,20 +66,23 @@ jobs:
           head -1
           )
 
-          echo "last_version=${LAST_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "last_version=${LAST_VERSION%*.}" >> "${GITHUB_OUTPUT}"
 
 
       - name: Match last tdlib version with .version contents
         id: match_versions
         shell: bash
-        run: >-
-          PLANNED_VERSION="$( cat .version )"
+        run: |
+          CURRENT_VERSION="$( cat .version )"
+          echo "current_version=${CURRENT_VERSION}" >> "${GITHUB_OUTPUT}"
 
-          if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
-            echo "match=true" >> "${GITHUB_OUTPUT}"
+          echo "Comparing '${{ steps.get_last_version.outputs.last_version }}' and '${CURRENT_VERSION}'"
+
+          if [[ "${{ steps.get_last_version.outputs.last_version }}" == "${CURRENT_VERSION}" ]]; then
+            echo "found_new=false" >> "${GITHUB_OUTPUT}"
             echo "caption=No new version found" >> "${GITHUB_OUTPUT}"
           else
-            echo "match=false" >> "${GITHUB_OUTPUT}"
+            echo "found_new=true" >> "${GITHUB_OUTPUT}"
             echo "caption=Scheduled run found new version: ${{ steps.get_last_version.outputs.last_version }}" >> "${GITHUB_OUTPUT}"
           fi
 
@@ -88,6 +98,39 @@ jobs:
           rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
           rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+      - name: Create a branch with a change for the found version
+        id: create_new_version_branch
+        if: steps.match_versions.outputs.found_new == 'true' && github.event.inputs.prepare_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          ssh_private_key_filename=$(mktemp)
+          chmod 600 "${ssh_private_key_filename}"
+          echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
+
+          eval $(ssh-agent)
+          ssh-add "${ssh_private_key_filename}"
+
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+
+          [[ -f .version ]] || { echo "Error: no .version file found"; exit 2; }
+
+          git checkout -b build_${{ steps.get_last_version.outputs.last_version }}
+          echo "${{ steps.get_last_version.outputs.last_version }}" > .version
+
+          git add .version
+          git commit -a -m "gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}"
+          git push origin build_${{ steps.get_last_version.outputs.last_version }}
+
+          git status
+
+          gh pr create -B master -H build_${{ steps.get_last_version.outputs.last_version }} \
+            --title 'gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}' \
+            --body 'v${{ steps.get_last_version.outputs.last_version }}'
 
 
       - name: Setup Terraform
@@ -122,13 +165,12 @@ jobs:
         env:
           TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
           TF_VAR_github_runners_count: 1
-        run: >-
-          terraform show -json |
-          jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' >
+        run: |
+          terraform show -json | \
+          jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' > \
           "outputs.json"
 
           cat outputs.json
-
           cat <<EOF >> "${GITHUB_OUTPUT}"
           instances<<EOF2
           $( cat outputs.json )
@@ -145,6 +187,11 @@ jobs:
             <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
             <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+
+            <b>Version check:</b>
+            Current version: ${{ steps.match_versions.outputs.current_version }}
+            Latest version: ${{ steps.get_last_version.outputs.last_version }}
+            Found new version: ${{ steps.match_versions.outputs.found_new }}
 
             <b>Instances:</b>
             ${{ steps.terraform_show.outputs.instances }}
