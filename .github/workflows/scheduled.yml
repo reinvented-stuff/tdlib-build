@@ -59,7 +59,7 @@ jobs:
           head -1
           )
 
-          echo "last_version=${LAST_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "last_version=${LAST_VERSION%*.}" >> "${GITHUB_OUTPUT}"
 
 
       - name: Match last tdlib version with .version contents
@@ -96,6 +96,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+
+          echo "steps.match_versions.outputs.match='${{ steps.match_versions.outputs.match }}'"
+
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@local'
 
