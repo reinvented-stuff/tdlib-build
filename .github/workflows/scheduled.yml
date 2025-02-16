@@ -71,8 +71,7 @@ jobs:
       - name: Match last tdlib version with .version contents
         id: match_versions
         shell: bash
-        run: >-
-          ls -lah . 
+        run: |
           CURRENT_VERSION="$( cat .version )"
           echo "current_version=${CURRENT_VERSION}" >> "${GITHUB_OUTPUT}"
 
