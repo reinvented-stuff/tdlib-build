@@ -72,13 +72,14 @@ jobs:
         id: match_versions
         shell: bash
         run: >-
-          PLANNED_VERSION="$( cat .version )"
+          CURRENT_VERSION="$( cat .version )"
+          echo "current_version=false" >> "${GITHUB_OUTPUT}"
 
-          if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${PLANNED_VERSION}" ]]; then
-            echo "match=true" >> "${GITHUB_OUTPUT}"
+          if [[ "${{ steps.get_last_version.outputs.last_version }}" =~ "${CURRENT_VERSION}" ]]; then
+            echo "found_new=false" >> "${GITHUB_OUTPUT}"
             echo "caption=No new version found" >> "${GITHUB_OUTPUT}"
           else
-            echo "match=false" >> "${GITHUB_OUTPUT}"
+            echo "found_new=true" >> "${GITHUB_OUTPUT}"
             echo "caption=Scheduled run found new version: ${{ steps.get_last_version.outputs.last_version }}" >> "${GITHUB_OUTPUT}"
           fi
 
@@ -98,7 +99,7 @@ jobs:
 
       - name: Create a branch with a change for the found version
         id: create_new_version_branch
-        if: steps.match_versions.outputs.match == 'true' || github.event.inputs.prepare_changes == 'true'
+        if: steps.match_versions.outputs.found_new == 'true' && github.event.inputs.prepare_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -109,7 +110,7 @@ jobs:
           [[ -f .version ]] || { echo "Error: no .version file found"; exit 2; }
 
           git checkout -b build_${{ steps.get_last_version.outputs.last_version }}
-          echo "${{ steps.get_last_version.outputs.last_version }}b" > .version
+          echo "${{ steps.get_last_version.outputs.last_version }}" > .version
 
           git add .version
           git commit -a -m "gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}"
@@ -178,6 +179,11 @@ jobs:
             <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
             <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
             <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+
+            <b>Version check:</b>
+            Current version: ${{ steps.match_versions.outputs.current_version }}
+            Latest version: ${{ steps.get_last_version.outputs.last_version }}
+            Found new version: ${{ steps.match_versions.outputs.found_new }}
 
             <b>Instances:</b>
             ${{ steps.terraform_show.outputs.instances }}
