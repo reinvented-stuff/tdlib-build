@@ -108,7 +108,7 @@ jobs:
 
           ssh_private_key_filename=$(mktemp)
           chmod 600 "${ssh_private_key_filename}"
-          echo "${ACTIONS_ED25519_KEY}" > "${ssh_private_key_filename}"
+          echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
 
           eval $(ssh-agent)
           ssh-add "${ssh_private_key_filename}"
