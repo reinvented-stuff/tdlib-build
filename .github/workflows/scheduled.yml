@@ -106,8 +106,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
 
+          ssh_private_key_filename=$(mktemp)
+          chmod 600 "${ssh_private_key_filename}"
+          echo "${ACTIONS_ED25519_KEY}" > "${ssh_private_key_filename}"
+
+          eval $(ssh-agent)
+          ssh-add "${ssh_private_key_filename}"
+
           git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.email 'github-actions@users.noreply.github.com'
 
           [[ -f .version ]] || { echo "Error: no .version file found"; exit 2; }
 
@@ -116,8 +123,6 @@ jobs:
 
           git add .version
           git commit -a -m "gh-84 [Change] Automated version bump to ${{ steps.get_last_version.outputs.last_version }}"
-
-          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}
           git push origin build_${{ steps.get_last_version.outputs.last_version }}
 
           git status
