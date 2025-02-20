@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          ssh-key: ${{ secrets.ACTIONS_ED25519_KEY }}
 
 
       - name: Check out tdlib repo
@@ -102,17 +102,10 @@ jobs:
 
       - name: Create a branch with a change for the found version
         id: create_new_version_branch
-        if: steps.match_versions.outputs.found_new == 'true' && github.event.inputs.prepare_changes == 'true'
+        # if: steps.match_versions.outputs.found_new == 'true' && github.event.inputs.prepare_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-
-          ssh_private_key_filename=$(mktemp)
-          chmod 600 "${ssh_private_key_filename}"
-          echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
-
-          eval $(ssh-agent)
-          ssh-add "${ssh_private_key_filename}"
 
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
