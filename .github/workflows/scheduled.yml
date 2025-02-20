@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ssh-key: ${{ steps.prepare_git_credentials.outputs.ssh_key }}
+          ssh-key: ${{ secrets.ACTIONS_ED25519_KEY }}
 
 
       - name: Check out tdlib repo
