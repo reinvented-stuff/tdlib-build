@@ -107,7 +107,7 @@ jobs:
         run: |
 
           git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@local'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
           [[ -f .version ]] || { echo "Error: no .version file found"; exit 2; }
 
