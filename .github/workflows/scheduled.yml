@@ -36,12 +36,23 @@ jobs:
           rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
+      - name: Prepare credentials for git
+        id: prepare_git_credentials
+        shell: bash
+        run: |
+          ssh_private_key_filename=$(mktemp)
+          chmod 600 "${ssh_private_key_filename}"
+          echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
+
+          echo "ssh_key=${ssh_private_key_filename}" >> "${GITHUB_OUTPUT}"
+
+
       - name: Check out code
         id: checkout_code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          ssh-key: ${{ steps.prepare_git_credentials.outputs.ssh_key }}
 
 
       - name: Check out tdlib repo
@@ -107,13 +118,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
 
-          ssh_private_key_filename=$(mktemp)
-          chmod 600 "${ssh_private_key_filename}"
-          echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
+          # ssh_private_key_filename=$(mktemp)
+          # chmod 600 "${ssh_private_key_filename}"
+          # echo "${{ secrets.ACTIONS_ED25519_KEY }}" > "${ssh_private_key_filename}"
 
-          eval $(ssh-agent)
-          ssh-add "${ssh_private_key_filename}"
-          ssh-add -L
+          # eval $(ssh-agent)
+          # ssh-add "${ssh_private_key_filename}"
+          # ssh-add -L
 
           git remote -v
           git fetch --all
