@@ -313,6 +313,10 @@ jobs:
             label: linux-ubuntu-22.04
             arch: amd64
 
+          - os: ubuntu-24.04
+            label: linux-ubuntu-24.04
+            arch: amd64
+
           - os: macos-14
             label: macos14
             arch: arm64
@@ -504,10 +508,10 @@ jobs:
 
         runs-on:
 
-          - os: ubuntu-22.04
-            label: alpine-3.18
+          - os: ubuntu-24.04
+            label: alpine-3.21
             arch: amd64
-            docker: alpine-3.18
+            docker: alpine-3.21
 
           # - os: macos-14
           #   label: alpine-3.18
