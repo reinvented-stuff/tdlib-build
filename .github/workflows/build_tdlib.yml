@@ -523,7 +523,7 @@ jobs:
 
     needs:
       - validate_new_version
-      - prepare_runners
+      # - prepare_runners
 
     env:
       PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
