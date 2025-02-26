@@ -10,7 +10,7 @@ on:
   push:
     branches:
       - 'build_*'
-      - 'dev-artifacts-in-google-bucket'
+      - '*/gh-97/*'
       - '!master'
 
 jobs:
@@ -100,393 +100,393 @@ jobs:
           fi
 
 
-  prepare_runners:
-    name: Spin up GitHub runners
-    runs-on: ubuntu-latest
-    needs:
-      - validate_new_version
+  # prepare_runners:
+  #   name: Spin up GitHub runners
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - validate_new_version
 
-    steps:
+  #   steps:
 
-      - name: Check out this repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #     - name: Check out this repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.0.11
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.0.11
 
 
-      - name: Get GitHub runner registration token
-        id: get_ghr_token
-        shell: bash
-        run: >-
-          RESULT_PAYLOAD_FILENAME="${PWD}/.ghr_token_result_payload.json";
-          RESULT_CODE_FILENAME="${PWD}/.ghr_token_result_code.txt";
-          TOKEN_FILENAME="${PWD}/.ghr_token";
+  #     - name: Get GitHub runner registration token
+  #       id: get_ghr_token
+  #       shell: bash
+  #       run: >-
+  #         RESULT_PAYLOAD_FILENAME="${PWD}/.ghr_token_result_payload.json";
+  #         RESULT_CODE_FILENAME="${PWD}/.ghr_token_result_code.txt";
+  #         TOKEN_FILENAME="${PWD}/.ghr_token";
 
-          curl
-          -o "${RESULT_PAYLOAD_FILENAME}"
-          -w "%{http_code}"
-          -X POST
-          -H "Accept: application/vnd.github+json"
-          -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
-          "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token" > "${RESULT_CODE_FILENAME}"
-
-          RESULT_CODE=$(cat "${RESULT_CODE_FILENAME}");
-          RESULT_CODE_SUCCESS="201";
-
-          echo "Token retrival result code: '${RESULT_CODE}'";
-
-          if [[ "${RESULT_CODE}" == "${RESULT_CODE_SUCCESS}" ]]; then
-
-            TOKEN=$( jq ".token" < "${RESULT_PAYLOAD_FILENAME}");
-            echo "Token length: ${#TOKEN}";
-
-            if [[ "${TOKEN}" == "null" ]]; then
-              echo "Token retrival failed: No .token in the payload";
-              exit 4
-            fi
-
-            echo "${TOKEN}" > "${TOKEN_FILENAME}";
-
-          else
-
-            echo "Token retrival failed: ${RESULT_CODE}!=${RESULT_CODE_SUCCESS}";
-            echo "Token retrival result: $(cat "${RESULT_PAYLOAD_FILENAME}")";
-            exit 5;
-
-          fi
-
-          echo "token=${TOKEN}" >> "${GITHUB_OUTPUT}";
-          echo "token_filename=${TOKEN_FILENAME}" >> "${GITHUB_OUTPUT}";
-
-
-      - name: Render SSH private key from a secret
-        id: ssh_private_key
-        shell: bash
-        working-directory: infra/terraform
-        run: >-
-          echo "${{ secrets.VULTR_RSA_PRIVATE_KEY }}" > ./id_rsa
-
-
-      - name: Terraform init
-        id: terraform_init
-        shell: bash
-        working-directory: infra/terraform
-        env:
-          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_github_runners_count: 1
-        run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
-          terraform init
-          -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
-          -backend-config="access_key=${{ secrets.S3_ACCESS_KEY }}"
-          -backend-config="secret_key=${{ secrets.S3_SECRET_KEY }}"
-
-
-      - name: Terraform plan
-        id: terraform_plan
-        shell: bash
-        working-directory: infra/terraform
-        env:
-          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_github_runners_count: 1
-        run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
-          terraform plan
-
+  #         curl
+  #         -o "${RESULT_PAYLOAD_FILENAME}"
+  #         -w "%{http_code}"
+  #         -X POST
+  #         -H "Accept: application/vnd.github+json"
+  #         -H "Authorization: Bearer ${{ secrets.API_GITHUB_RUNNERS_TOKEN }}"
+  #         "https://api.github.com/orgs/reinvented-stuff/actions/runners/registration-token" > "${RESULT_CODE_FILENAME}"
+
+  #         RESULT_CODE=$(cat "${RESULT_CODE_FILENAME}");
+  #         RESULT_CODE_SUCCESS="201";
+
+  #         echo "Token retrival result code: '${RESULT_CODE}'";
+
+  #         if [[ "${RESULT_CODE}" == "${RESULT_CODE_SUCCESS}" ]]; then
+
+  #           TOKEN=$( jq ".token" < "${RESULT_PAYLOAD_FILENAME}");
+  #           echo "Token length: ${#TOKEN}";
+
+  #           if [[ "${TOKEN}" == "null" ]]; then
+  #             echo "Token retrival failed: No .token in the payload";
+  #             exit 4
+  #           fi
+
+  #           echo "${TOKEN}" > "${TOKEN_FILENAME}";
+
+  #         else
+
+  #           echo "Token retrival failed: ${RESULT_CODE}!=${RESULT_CODE_SUCCESS}";
+  #           echo "Token retrival result: $(cat "${RESULT_PAYLOAD_FILENAME}")";
+  #           exit 5;
+
+  #         fi
+
+  #         echo "token=${TOKEN}" >> "${GITHUB_OUTPUT}";
+  #         echo "token_filename=${TOKEN_FILENAME}" >> "${GITHUB_OUTPUT}";
+
+
+  #     - name: Render SSH private key from a secret
+  #       id: ssh_private_key
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       run: >-
+  #         echo "${{ secrets.VULTR_RSA_PRIVATE_KEY }}" > ./id_rsa
+
+
+  #     - name: Terraform init
+  #       id: terraform_init
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       env:
+  #         TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+  #         TF_VAR_github_runners_count: 1
+  #       run: >-
+  #         export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
+  #         terraform init
+  #         -backend-config="endpoint=${{ secrets.S3_ENDPOINT }}"
+  #         -backend-config="access_key=${{ secrets.S3_ACCESS_KEY }}"
+  #         -backend-config="secret_key=${{ secrets.S3_SECRET_KEY }}"
+
+
+  #     - name: Terraform plan
+  #       id: terraform_plan
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       env:
+  #         TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+  #         TF_VAR_github_runners_count: 1
+  #       run: >-
+  #         export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
+  #         terraform plan
+
 
-      - name: Terraform apply
-        id: terraform_apply
-        shell: bash
-        working-directory: infra/terraform
-        env:
-          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_github_runners_count: 1
-        run: >-
-          export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
-
-          terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
-
-
-      - name: Terraform show
-        id: terraform_show
-        shell: bash
-        working-directory: infra/terraform
-        continue-on-error: true
-        env:
-          TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
-          TF_VAR_github_runners_count: 1
-        run: |
-          terraform show -json
-
-
-      - name: Parse terraform show output
-        id: parse_terraform_show
-        shell: bash
-        working-directory: infra/terraform
-        continue-on-error: true
-        run: |
-          cat <<EOF > outputs.json
-          ${{ steps.terraform_show.outputs.stdout }}
-          EOF
-
-          cat <<EOF >> "${GITHUB_OUTPUT}"
-          instances<<EOF2
-          $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
-          EOF2
-          EOF
-
-
-      - name: Send notification with terraform outputs
-        uses: rest-gateway/notification-action@1.0.9
-        if: always()
-        with:
-          message: |
-            <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
-            <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
-            <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
-
-            <b>Instances:</b>
-            ${{ steps.parse_terraform_show.outputs.instances }}
-
-            <b>Outcome:</b>
-            terraform init: ${{ steps.terraform_init.outcome }}
-            terraform plan: ${{ steps.terraform_plan.outcome }}
-            terraform apply: ${{ steps.terraform_apply.outcome }}
-
-          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
-          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
-          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
-          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
-
-
-      - name: Upload terraform apply log
-        uses: actions/upload-artifact@v4
-        id: upload_terraform_apply_log
-        if: always()
-        with:
-          name: "terraform_apply.log"
-          path: "infra/terraform/terraform_apply.log"
-          if-no-files-found: error
-          retention-days: 90
-
-
-      - name: Upload terraform show result
-        uses: actions/upload-artifact@v4
-        id: upload_terraform_show_result
-        if: always()
-        with:
-          name: "outputs.json"
-          path: "infra/terraform/outputs.json"
-          if-no-files-found: error
-          retention-days: 90
-
-
-  build_matrix:
-    name: Build Multi-platform
-
-    outputs:
-      job_status: ${{ job.status }}
-
-    strategy:
-      matrix:
-        version:
-          - ${{ needs.validate_new_version.outputs.planned_version }}
-        runs-on:
-
-          - os: redhat-8
-            label: linux-redhat-8
-            arch: amd64
-
-          - os: redhat-9
-            label: linux-redhat-9
-            arch: amd64
-
-          - os: ubuntu-22.04
-            label: linux-ubuntu-22.04
-            arch: amd64
-
-          - os: macos-14
-            label: macos14
-            arch: arm64
-
-    runs-on: ${{ matrix.runs-on.os }}
-
-    needs:
-      - validate_new_version
-      - prepare_runners
-
-    env:
-      PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
-      PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
-      TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
-      CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
-      TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
-      BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
-      APP_NAME: "tdlib"
-      ARTIFACT_BASENAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
-      ARTIFACT_TARGZ_NAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
-
-    steps:
-
-      - name: Check out this repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-
-      - name: Install Cloud SDK
-        id: install_gcloud
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          version: '443.0.0'
-
-
-      - name: Setup Google Cloud authentication
-        id: setup_gcp_authentication
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
-
-
-      - name: Obtain Google Cloud OAuth2 token
-        id: obtain_gcp_token
-        shell: bash
-        run: |
-          echo "token=$( gcloud auth print-access-token )" >> "${GITHUB_OUTPUT}"
-
-
-      - name: Install dependencies
-        id: install_dependencies
-        shell: bash
-        run: |
-          bash "sbin/${{ matrix.runs-on.os }}/install-dependencies.sh"
-
-
-      - name: Print out dir contents
-        id: tmp_ls
-        shell: bash
-        run: |
-          pwd
-          ls -la .
-
-
-      - name: Check out tdlib repo
-        id: checkout_tdlib_repo
-        shell: bash
-        run: |
-          mkdir -pv td
-          git clone https://github.com/tdlib/td.git td
-
-
-      - name: Check out specific commit in tdlib repo
-        id: checkout_tdlib_repo_commit
-        shell: bash
-        working-directory: td
-        run: |
-          git status
-          git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
-
-
-      - name: Print out directory contents
-        id: print_directory_contents
-        shell: bash
-        run: |
-          ls -lAth .
-
-
-      - name: Build TDLib
-        id: build
-        shell: bash
-        run: |
-          bash "sbin/${{ matrix.runs-on.os }}/build.sh"
-
-
-      - name: Compress binaries
-        id: compress_binaries
-        shell: bash
-        run: |
-          mkdir -v "${{ env.ARTIFACT_BASENAME }}"
-          mv -v td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
-          tar -zvcf "${{ env.ARTIFACT_TARGZ_NAME }}" "${{ env.ARTIFACT_BASENAME }}"
-
-
-      - name: Upload a Build Artifact
-        id: upload_build_artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: "${{ env.ARTIFACT_TARGZ_NAME }}"
-          path: "${{ env.ARTIFACT_TARGZ_NAME }}"
-          if-no-files-found: error
-          retention-days: 90
-
-
-      - name: Upload artifact to Google Bucket
-        id: upload_to_google_bucket
-        shell: bash
-        run: >-
-          curl
-          -X PUT
-          -H "Authorization: Bearer ${{ steps.obtain_gcp_token.outputs.token }}"
-          -T "${{ env.ARTIFACT_TARGZ_NAME }}"
-          "https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}/${{ env.ARTIFACT_TARGZ_NAME }}"
-
-
-      - name: List artifacts from Google Bucket
-        id: list_artifacts
-        shell: bash
-        run: >-
-          curl
-          -o list_artifacts_result.json
-          -X GET
-          -H "Content-Type: application/json"
-          "https://www.googleapis.com/storage/v1/b/${{ secrets.GCP_BUCKET_NAME }}/o/"
-
-          jq -r '.items[].mediaLink' < list_artifacts_result.json
-
-
-      - name: Send notification on build completion
-        uses: rest-gateway/notification-action@1.0.9
-        if: always()
-        with:
-          message: |
-            <b>Workflow:</b>   ${GITHUB_WORKFLOW}
-            <b>Repository:</b> ${GITHUB_REPOSITORY}
-
-            <b>Matrix:</b>
-            Version: ${{ matrix.version }}
-            Ref: ${{ env.PLANNED_VERSION_COMMIT }}
-            Label: ${{ matrix.runs-on.label }}
-            Arch: ${{ matrix.runs-on.arch }}
-
-            <b>Outcome:</b>
-            install_gcloud: ${{ steps.install_gcloud.outcome }}
-            setup_gcp_authentication: ${{ steps.setup_gcp_authentication.outcome }}
-            obtain_gcp_token: ${{ steps.obtain_gcp_token.outcome }}
-            install_dependencies: ${{ steps.install_dependencies.outcome }}
-            checkout_tdlib_repo: ${{ steps.checkout_tdlib_repo.outcome }}
-            print_directory_contents: ${{ steps.print_directory_contents.outcome }}
-            build: ${{ steps.build.outcome }}
-            compress_binaries: ${{ steps.compress_binaries.outcome }}
-            upload_build_artifact: ${{ steps.upload_build_artifact.outcome }}
-            upload_to_google_bucket: ${{ steps.upload_to_google_bucket.outcome }}
-            list_artifacts: ${{ steps.list_artifacts.outcome }}
-
-            <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
-            <b>Artifact:</b> https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}/${{ env.ARTIFACT_TARGZ_NAME }}
-            <b>Artifact repo:</b> https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}
-
-          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
-          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
-          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
-          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+  #     - name: Terraform apply
+  #       id: terraform_apply
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       env:
+  #         TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+  #         TF_VAR_github_runners_count: 1
+  #       run: >-
+  #         export TF_VAR_ansible_ghr_token=$( cat "${{ steps.get_ghr_token.outputs.token_filename }}" )
+
+  #         terraform apply -auto-approve -no-color 2>&1 > terraform_apply.log
+
+
+  #     - name: Terraform show
+  #       id: terraform_show
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       continue-on-error: true
+  #       env:
+  #         TF_VAR_vultr_api_key: "${{ secrets.VULTR_API_KEY }}"
+  #         TF_VAR_github_runners_count: 1
+  #       run: |
+  #         terraform show -json
+
+
+  #     - name: Parse terraform show output
+  #       id: parse_terraform_show
+  #       shell: bash
+  #       working-directory: infra/terraform
+  #       continue-on-error: true
+  #       run: |
+  #         cat <<EOF > outputs.json
+  #         ${{ steps.terraform_show.outputs.stdout }}
+  #         EOF
+
+  #         cat <<EOF >> "${GITHUB_OUTPUT}"
+  #         instances<<EOF2
+  #         $( cat outputs.json | jq -r '.values.outputs."instance-details".value[][] | .name + "\n" + .ipv4 + "\n" + .ipv6 + "\n"' )
+  #         EOF2
+  #         EOF
+
+
+  #     - name: Send notification with terraform outputs
+  #       uses: rest-gateway/notification-action@1.0.9
+  #       if: always()
+  #       with:
+  #         message: |
+  #           <b>Workflow:</b> <code>${GITHUB_WORKFLOW}</code>
+  #           <b>Repository:</b> ${GITHUB_REPOSITORY} (${GITHUB_REF#refs/heads/})
+  #           <b>URL:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+
+  #           <b>Instances:</b>
+  #           ${{ steps.parse_terraform_show.outputs.instances }}
+
+  #           <b>Outcome:</b>
+  #           terraform init: ${{ steps.terraform_init.outcome }}
+  #           terraform plan: ${{ steps.terraform_plan.outcome }}
+  #           terraform apply: ${{ steps.terraform_apply.outcome }}
+
+  #         recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+  #         rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+  #         rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+  #         rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+  #     - name: Upload terraform apply log
+  #       uses: actions/upload-artifact@v4
+  #       id: upload_terraform_apply_log
+  #       if: always()
+  #       with:
+  #         name: "terraform_apply.log"
+  #         path: "infra/terraform/terraform_apply.log"
+  #         if-no-files-found: error
+  #         retention-days: 90
+
+
+  #     - name: Upload terraform show result
+  #       uses: actions/upload-artifact@v4
+  #       id: upload_terraform_show_result
+  #       if: always()
+  #       with:
+  #         name: "outputs.json"
+  #         path: "infra/terraform/outputs.json"
+  #         if-no-files-found: error
+  #         retention-days: 90
+
+
+  # build_matrix:
+  #   name: Build Multi-platform
+
+  #   outputs:
+  #     job_status: ${{ job.status }}
+
+  #   strategy:
+  #     matrix:
+  #       version:
+  #         - ${{ needs.validate_new_version.outputs.planned_version }}
+  #       runs-on:
+
+  #         - os: redhat-8
+  #           label: linux-redhat-8
+  #           arch: amd64
+
+  #         - os: redhat-9
+  #           label: linux-redhat-9
+  #           arch: amd64
+
+  #         - os: ubuntu-22.04
+  #           label: linux-ubuntu-22.04
+  #           arch: amd64
+
+  #         - os: macos-14
+  #           label: macos14
+  #           arch: arm64
+
+  #   runs-on: ${{ matrix.runs-on.os }}
+
+  #   needs:
+  #     - validate_new_version
+  #     # - prepare_runners
+
+  #   env:
+  #     PLANNED_VERSION: ${{ needs.validate_new_version.outputs.planned_version }}
+  #     PLANNED_VERSION_COMMIT: ${{ needs.validate_new_version.outputs.planned_version_commit }}
+  #     TAG_HASH: ${{ needs.validate_new_version.outputs.tag_hash }}
+  #     CAN_CREATE_RELEASE: ${{ needs.validate_new_version.outputs.can_create }}
+  #     TAG_EXISTS: ${{ needs.validate_new_version.outputs.tag_exists }}
+  #     BRANCH_NAME: ${{ needs.validate_new_version.outputs.branch_name }}
+  #     APP_NAME: "tdlib"
+  #     ARTIFACT_BASENAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}"
+  #     ARTIFACT_TARGZ_NAME: "tdlib-${{ matrix.version }}-${{ matrix.runs-on.label }}-${{ matrix.runs-on.arch }}.tar.gz"
+
+  #   steps:
+
+  #     - name: Check out this repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+
+
+  #     - name: Install Cloud SDK
+  #       id: install_gcloud
+  #       uses: google-github-actions/setup-gcloud@v2
+  #       with:
+  #         version: '443.0.0'
+
+
+  #     - name: Setup Google Cloud authentication
+  #       id: setup_gcp_authentication
+  #       uses: google-github-actions/auth@v2
+  #       with:
+  #         credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+
+  #     - name: Obtain Google Cloud OAuth2 token
+  #       id: obtain_gcp_token
+  #       shell: bash
+  #       run: |
+  #         echo "token=$( gcloud auth print-access-token )" >> "${GITHUB_OUTPUT}"
+
+
+  #     - name: Install dependencies
+  #       id: install_dependencies
+  #       shell: bash
+  #       run: |
+  #         bash "sbin/${{ matrix.runs-on.os }}/install-dependencies.sh"
+
+
+  #     - name: Print out dir contents
+  #       id: tmp_ls
+  #       shell: bash
+  #       run: |
+  #         pwd
+  #         ls -la .
+
+
+  #     - name: Check out tdlib repo
+  #       id: checkout_tdlib_repo
+  #       shell: bash
+  #       run: |
+  #         mkdir -pv td
+  #         git clone https://github.com/tdlib/td.git td
+
+
+  #     - name: Check out specific commit in tdlib repo
+  #       id: checkout_tdlib_repo_commit
+  #       shell: bash
+  #       working-directory: td
+  #       run: |
+  #         git status
+  #         git checkout "${{ env.PLANNED_VERSION_COMMIT }}"
+
+
+  #     - name: Print out directory contents
+  #       id: print_directory_contents
+  #       shell: bash
+  #       run: |
+  #         ls -lAth .
+
+
+  #     - name: Build TDLib
+  #       id: build
+  #       shell: bash
+  #       run: |
+  #         bash "sbin/${{ matrix.runs-on.os }}/build.sh"
+
+
+  #     - name: Compress binaries
+  #       id: compress_binaries
+  #       shell: bash
+  #       run: |
+  #         mkdir -v "${{ env.ARTIFACT_BASENAME }}"
+  #         mv -v td/tdlib "${{ env.ARTIFACT_BASENAME }}/"
+  #         tar -zvcf "${{ env.ARTIFACT_TARGZ_NAME }}" "${{ env.ARTIFACT_BASENAME }}"
+
+
+  #     - name: Upload a Build Artifact
+  #       id: upload_build_artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: "${{ env.ARTIFACT_TARGZ_NAME }}"
+  #         path: "${{ env.ARTIFACT_TARGZ_NAME }}"
+  #         if-no-files-found: error
+  #         retention-days: 90
+
+
+  #     - name: Upload artifact to Google Bucket
+  #       id: upload_to_google_bucket
+  #       shell: bash
+  #       run: >-
+  #         curl
+  #         -X PUT
+  #         -H "Authorization: Bearer ${{ steps.obtain_gcp_token.outputs.token }}"
+  #         -T "${{ env.ARTIFACT_TARGZ_NAME }}"
+  #         "https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}/${{ env.ARTIFACT_TARGZ_NAME }}"
+
+
+  #     - name: List artifacts from Google Bucket
+  #       id: list_artifacts
+  #       shell: bash
+  #       run: >-
+  #         curl
+  #         -o list_artifacts_result.json
+  #         -X GET
+  #         -H "Content-Type: application/json"
+  #         "https://www.googleapis.com/storage/v1/b/${{ secrets.GCP_BUCKET_NAME }}/o/"
+
+  #         jq -r '.items[].mediaLink' < list_artifacts_result.json
+
+
+  #     - name: Send notification on build completion
+  #       uses: rest-gateway/notification-action@1.0.9
+  #       if: always()
+  #       with:
+  #         message: |
+  #           <b>Workflow:</b>   ${GITHUB_WORKFLOW}
+  #           <b>Repository:</b> ${GITHUB_REPOSITORY}
+
+  #           <b>Matrix:</b>
+  #           Version: ${{ matrix.version }}
+  #           Ref: ${{ env.PLANNED_VERSION_COMMIT }}
+  #           Label: ${{ matrix.runs-on.label }}
+  #           Arch: ${{ matrix.runs-on.arch }}
+
+  #           <b>Outcome:</b>
+  #           install_gcloud: ${{ steps.install_gcloud.outcome }}
+  #           setup_gcp_authentication: ${{ steps.setup_gcp_authentication.outcome }}
+  #           obtain_gcp_token: ${{ steps.obtain_gcp_token.outcome }}
+  #           install_dependencies: ${{ steps.install_dependencies.outcome }}
+  #           checkout_tdlib_repo: ${{ steps.checkout_tdlib_repo.outcome }}
+  #           print_directory_contents: ${{ steps.print_directory_contents.outcome }}
+  #           build: ${{ steps.build.outcome }}
+  #           compress_binaries: ${{ steps.compress_binaries.outcome }}
+  #           upload_build_artifact: ${{ steps.upload_build_artifact.outcome }}
+  #           upload_to_google_bucket: ${{ steps.upload_to_google_bucket.outcome }}
+  #           list_artifacts: ${{ steps.list_artifacts.outcome }}
+
+  #           <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+  #           <b>Artifact:</b> https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}/${{ env.ARTIFACT_TARGZ_NAME }}
+  #           <b>Artifact repo:</b> https://storage.googleapis.com/${{ secrets.GCP_BUCKET_NAME }}
+
+  #         recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+  #         rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+  #         rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+  #         rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
 
 
   build_matrix_docker:
@@ -504,9 +504,14 @@ jobs:
 
         runs-on:
 
-          - os: ubuntu-22.04
+          # - os: ubuntu-22.04
+          #   label: alpine-3.18
+          #   arch: amd64
+          #   docker: alpine-3.18
+
+          - os: rpi4
             label: alpine-3.18
-            arch: amd64
+            arch: arm64
             docker: alpine-3.18
 
           # - os: macos-14
