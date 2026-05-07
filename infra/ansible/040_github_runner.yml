@@ -20,14 +20,14 @@
 
     - name: Download actions-runner package
       uri:
-        url: https://github.com/actions/runner/releases/download/v2.294.0/actions-runner-linux-x64-2.294.0.tar.gz
-        dest: /opt/actions-runner/actions-runner-linux-x64-2.294.0.tar.gz
+        url: https://github.com/actions/runner/releases/download/v2.334.0/actions-runner-linux-x64-2.334.0.tar.gz
+        dest: /opt/actions-runner/actions-runner-linux-x64-2.334.0.tar.gz
         follow_redirects: yes
         status_code: [200, 304]
 
     - name: Unpack actions-runner package
       unarchive:
-        src: /opt/actions-runner/actions-runner-linux-x64-2.294.0.tar.gz
+        src: /opt/actions-runner/actions-runner-linux-x64-2.334.0.tar.gz
         dest: /opt/actions-runner
         remote_src: yes
         owner: ghr
