@@ -35,7 +35,7 @@ resource "vultr_instance" "ghr-redhat-8" {
 
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = "ghr"
     host        = self.main_ip
     timeout     = "10m"
     private_key = file("${var.ssh_private_key}")
@@ -79,7 +79,7 @@ resource "vultr_instance" "ghr-redhat-9" {
 
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = "ghr"
     host        = self.main_ip
     timeout     = "10m"
     private_key = file("${var.ssh_private_key}")
