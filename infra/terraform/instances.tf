@@ -17,7 +17,7 @@ resource "vultr_instance" "ghr-redhat-8" {
   os_id  = 448
 
   label = "ghr-redhat-8-${var.github_runners_plan}-${random_id.ghr-redhat-8-suffix[count.index].hex}-${count.index + 1}"
-  tags  = ["github_runner"]
+  tags  = ["github_runner", "gh"]
 
   hostname    = "ghr-redhat-8-${var.github_runners_plan}-${random_id.ghr-redhat-8-suffix[count.index].hex}-${count.index + 1}"
   enable_ipv6 = true
@@ -35,7 +35,7 @@ resource "vultr_instance" "ghr-redhat-8" {
 
   connection {
     type        = "ssh"
-    user        = "ghr"
+    user        = "root"
     host        = self.main_ip
     timeout     = "10m"
     private_key = file("${var.ssh_private_key}")
@@ -61,7 +61,7 @@ resource "vultr_instance" "ghr-redhat-9" {
   os_id  = 1869
 
   label = "ghr-redhat-9-${var.github_runners_plan}-${random_id.ghr-redhat-9-suffix[count.index].hex}-${count.index + 1}"
-  tags  = ["github_runner"]
+  tags  = ["github_runner", "gh"]
 
   hostname    = "ghr-redhat-9-${var.github_runners_plan}-${random_id.ghr-redhat-9-suffix[count.index].hex}-${count.index + 1}"
   enable_ipv6 = true
@@ -79,7 +79,7 @@ resource "vultr_instance" "ghr-redhat-9" {
 
   connection {
     type        = "ssh"
-    user        = "ghr"
+    user        = "root"
     host        = self.main_ip
     timeout     = "10m"
     private_key = file("${var.ssh_private_key}")
