@@ -74,13 +74,26 @@ jobs:
       - name: Retreive tdlib commit corresponding to the planned version
         id: get_version_commit
         shell: bash
-        run: >-
-          VERSION_COMMIT=$(
-          git --git-dir=td/.git
-          log
-          --pretty="format:%H"
-          --grep="Update version to ${{ steps.validate_new_version.outputs.planned_version }}"
-          )
+        run: |
+          PLANNED_VERSION="${{ steps.validate_new_version.outputs.planned_version }}"
+          VERSION_COMMIT=""
+
+          if [[ -f ".version_override.json" ]]; then
+            OVERRIDE_COMMIT=$(jq -r --arg v "${PLANNED_VERSION}" '.[] | select(.version == $v) | .commit_hash' .version_override.json)
+            if [[ -n "${OVERRIDE_COMMIT}" && "${OVERRIDE_COMMIT}" != "null" ]]; then
+              VERSION_COMMIT="${OVERRIDE_COMMIT}"
+              echo "Using overridden commit for version ${PLANNED_VERSION}: ${VERSION_COMMIT}"
+            fi
+          fi
+
+          if [[ -z "${VERSION_COMMIT}" ]]; then
+            VERSION_COMMIT=$(
+              git --git-dir=td/.git \
+                log \
+                --pretty="format:%H" \
+                --grep="Update version to ${PLANNED_VERSION}"
+            )
+          fi
 
           echo "version_commit=${VERSION_COMMIT}" >> "${GITHUB_OUTPUT}"
 

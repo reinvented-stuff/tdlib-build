@@ -1,0 +1,100 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:truthy
+
+name: Build TDLib Master Docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build_master_docker:
+    name: Build Docker image from master
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: "tdlib"
+
+    steps:
+
+      - name: Check out this repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      - name: Check out tdlib master
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          repository: tdlib/td
+          path: td
+
+
+      - name: Get latest version and commit info
+        id: get_version_info
+        shell: bash
+        run: |
+          LATEST_VERSION=$(
+            git -C td log \
+              --pretty="format:%s" \
+              --grep="Update version to" |
+            cut -d " " -f 4 |
+            head -1
+          )
+          LATEST_VERSION="${LATEST_VERSION%.}"
+
+          FULL_COMMIT=$(git -C td rev-parse HEAD)
+          SHORT_COMMIT=$(git -C td rev-parse --short HEAD)
+
+          echo "latest_version=${LATEST_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "full_commit=${FULL_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "short_commit=${SHORT_COMMIT}" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${LATEST_VERSION}-master-${SHORT_COMMIT}" >> "${GITHUB_OUTPUT}"
+
+
+      - name: Build Docker image (ghcr)
+        id: build_docker_image_ghcr
+        uses: reinvented-stuff/build-docker-image-action@2.6.0
+        with:
+          registry_address: "ghcr.io"
+          registry_username: "${{ github.actor }}"
+          registry_token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ github.repository_owner }}/${{ env.APP_NAME }}"
+          planned_version: "${{ steps.get_version_info.outputs.image_tag }}"
+          platform: "linux/amd64"
+          skip_branch_suffix: true
+          working_directory: "docker/alpine-3.18"
+          build_args: |-
+            APP_VERSION=${{ steps.get_version_info.outputs.latest_version }}
+            APP_VERSION_COMMIT=${{ steps.get_version_info.outputs.full_commit }}
+
+
+      - name: Send notification on completion
+        uses: rest-gateway/notification-action@1.0.9
+        if: always()
+        with:
+          message: |
+            <b>Workflow:</b> ${GITHUB_WORKFLOW}
+            <b>Repository:</b> ${GITHUB_REPOSITORY}
+
+            <b>Master Docker Build:</b>
+            Version: ${{ steps.get_version_info.outputs.latest_version }}
+            Commit: ${{ steps.get_version_info.outputs.short_commit }}
+            Image tag: ${{ steps.get_version_info.outputs.image_tag }}
+
+            <b>Image:</b>
+            <code>${{ steps.build_docker_image_ghcr.outputs.image_full_name }}</code>
+
+            <b>Outcome:</b>
+            build_docker_image_ghcr: ${{ steps.build_docker_image_ghcr.outcome }}
+
+            <b>Run:</b> <code>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</code>
+          recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
+          rest_gateway_url: "${{ secrets.REST_GATEWAY_API_URL }}"
+          rest_gateway_token: "${{ secrets.REST_GATEWAY_TOKEN }}"
+          rest_gateway_bot_name: "${{ secrets.REST_GATEWAY_BOT_NAME }}"
+
+
+...
